@@ -2,35 +2,27 @@ from rest_framework import serializers
 
 from .models import Test, Category, EasyQuestion, MediumQuestion, HardQuestion, ChoiceForEasyQ ,ChoiceForMediumQ, ChoiceForHardQ
 
-class EasyQuestionListSerializer(serializers.Serializer):
+class EasyQuestionListSerializer(serializers.ModelSerializer):
     class Meta:
         model = EasyQuestion
-        fields = [
-            'text'
-        ]
-        # fields = [
-        #     'text'
-        # ]
+        fields = '__all__'
 
-class MediumQuestionListSerializer(serializers.Serializer):
+class MediumQuestionListSerializer(serializers.ModelSerializer):
     class Meta:
         model = MediumQuestion
-        fields = '__all__()'
-        # fields = [
-        #     'text'
-        # ]
+        fields = '__all__'
 
-class HardQuestionListSerializer(serializers.Serializer):
+class HardQuestionListSerializer(serializers.ModelSerializer):
     class Meta:
         model = HardQuestion
-        fields = [
-            'text'
-        ]
+        fields = '__all__'
 
-class TestCreateSerializer(serializers.ModelSerializer):
-    easy_questions = EasyQuestionListSerializer( many = True, read_only=True)
-    medium_questions = MediumQuestionListSerializer( many = True, read_only=True)
-    hard_quesions = HardQuestionListSerializer( many = True, read_only=True)
+
+
+class TestListSerializer(serializers.ModelSerializer):
+    easy_questions = EasyQuestionListSerializer(source='easyquestion_set', many=True, read_only=True)
+    medium_questions = MediumQuestionListSerializer(source='mediumquestion_set', many=True, read_only=True)    
+    hard_questions = HardQuestionListSerializer(source='hardquestion_set', many=True, read_only=True)
 
     class Meta:
         model = Test
@@ -44,8 +36,12 @@ class TestCreateSerializer(serializers.ModelSerializer):
             'updated_at',
             'easy_questions',
             'medium_questions',
-            'hard_quesions'
+            'hard_questions'
         ]
+
+    # def get_easy_questions(self, obj):
+    #     user = 
+        
     
 
 

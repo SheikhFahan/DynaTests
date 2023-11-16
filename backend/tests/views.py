@@ -1,12 +1,12 @@
 from django.shortcuts import render
 from rest_framework import generics
 from .models import Test , EasyQuestion, MediumQuestion
-from .serializers import TestCreateSerializer , EasyQuestionListSerializer, MediumQuestionListSerializer
+from .serializers import TestListSerializer , EasyQuestionListSerializer, MediumQuestionListSerializer
 # Create your views here.
 
-class TestCreateAPIView(generics.ListCreateAPIView):
+class TestListAPIView(generics.ListAPIView):
     queryset = Test.objects.all()
-    serializer_class = TestCreateSerializer
+    serializer_class = TestListSerializer
     print(queryset)
 
 

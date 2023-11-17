@@ -1,32 +1,73 @@
 from rest_framework import serializers
 
-from .models import Test, Category, EasyQuestion, MediumQuestion, HardQuestion, ChoiceForEasyQ ,ChoiceForMediumQ, ChoiceForHardQ
+from .models import (
+    Test, Category, EasyQuestion, MediumQuestion, 
+    HardQuestion, ChoiceForEasyQ ,ChoiceForMediumQ, 
+    ChoiceForHardQ,
+    )
+
+class EasyChoiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChoiceForEasyQ
+        fields = ['text', 'is_correct']
+
+class MediumChoiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChoiceForMediumQ
+        fields = ['text', 'is_correct']
+
+class HardChoiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChoiceForHardQ
+        fields = ['text', 'is_correct']
+
 
 class EasyQuestionListSerializer(serializers.ModelSerializer):
+    choice_for_easy_questions = EasyChoiceSerializer(source = 'choiceforeasyq_set', read_only = True, many =True)
+    choice_for_medium_questions = EasyChoiceSerializer(source = 'choiceformediumq_set', read_only = True, many =True)
+    choice_for_hard_questions = EasyChoiceSerializer(source = 'choiceforhardq_set', read_only = True, many =True)
+
+
     class Meta:
         model = EasyQuestion
-        fields = '__all__'
+        fields = [
+            'text',
+            'choice_for_easy_questions',
+            'choice_for_medium_questions',
+            'choice_for_hard_questions',
+        ]
+
+    
 
 class MediumQuestionListSerializer(serializers.ModelSerializer):
     class Meta:
         model = MediumQuestion
-        fields = '__all__'
+        fields = [
+            'text'
+        ]
+
 
 class HardQuestionListSerializer(serializers.ModelSerializer):
     class Meta:
         model = HardQuestion
-        fields = '__all__'
+        fields = [
+            'text'
+        ]
+
 
 
 
 class TestListSerializer(serializers.ModelSerializer):
-    easy_questions = EasyQuestionListSerializer(source='easyquestion_set', many=True, read_only=True)
+    # xp = serializers.SerializerMethodField(read_only = True)
+    easy_questions = EasyQuestionListSerializer(source = 'easyquestion_set', many=True, read_only=True)
     medium_questions = MediumQuestionListSerializer(source='mediumquestion_set', many=True, read_only=True)    
     hard_questions = HardQuestionListSerializer(source='hardquestion_set', many=True, read_only=True)
+
 
     class Meta:
         model = Test
         fields = [
+            'pk',
             'title',
             'difficulty',
             'description',
@@ -38,16 +79,30 @@ class TestListSerializer(serializers.ModelSerializer):
             'medium_questions',
             'hard_questions'
         ]
+        depth = 0
 
-    # def get_easy_questions(self, obj):
-    #     user = 
-        
-    
+    def get_xp(self, instance):
+        pass
 
+    def to_representation(self, instance):
+        # Limit the number of easy questions to 5 (change the limit as needed)
+        # xp
+        # total_questions = x
+        # use total questions and xp to set the individual limit for the questions
 
+        limit = 2
+        queryset1 = instance.easyquestion_set.all()[:limit]
+        queryset2 = instance.mediumquestion_set.all()[:limit]
+        queryset3 = instance.hardquestion_set.all()[:limit]
 
-# class TestCreateSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         field = [
-#             ''
-#         ]
+        # Serialize the limited queryset
+        easy_questions_data = EasyQuestionListSerializer(queryset1, many=True).data
+        medium_questions_data = EasyQuestionListSerializer(queryset2, many=True).data
+        hard_questions_data = EasyQuestionListSerializer(queryset3, many=True).data
+        # Add the serialized data to the representation
+        # representation = super(TestListSerializer, self).to_representation(instance)
+        representation = super().to_representation(instance)
+        representation['easy_questions'] = easy_questions_data
+        representation['medium_questions'] = medium_questions_data
+        representation['hard_questions'] = hard_questions_data
+        return representation

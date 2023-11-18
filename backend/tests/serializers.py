@@ -23,41 +23,46 @@ class HardChoiceSerializer(serializers.ModelSerializer):
 
 
 class EasyQuestionListSerializer(serializers.ModelSerializer):
-    choice_for_easy_questions = EasyChoiceSerializer(source = 'choiceforeasyq_set', read_only = True, many =True)
-    choice_for_medium_questions = EasyChoiceSerializer(source = 'choiceformediumq_set', read_only = True, many =True)
-    choice_for_hard_questions = EasyChoiceSerializer(source = 'choiceforhardq_set', read_only = True, many =True)
+    choices = EasyChoiceSerializer(source = 'choiceforeasyq_set', read_only = True, many =True)
 
 
     class Meta:
         model = EasyQuestion
         fields = [
             'text',
-            'choice_for_easy_questions',
-            'choice_for_medium_questions',
-            'choice_for_hard_questions',
+            'choices',
         ]
 
     
 
 class MediumQuestionListSerializer(serializers.ModelSerializer):
+    choices = EasyChoiceSerializer(source = 'choiceformediumq_set', read_only = True, many =True)
     class Meta:
         model = MediumQuestion
         fields = [
-            'text'
+            'text',
+            'choices',
+
         ]
 
 
 class HardQuestionListSerializer(serializers.ModelSerializer):
+    choices = EasyChoiceSerializer(source = 'choiceforhardq_set', read_only = True, many =True)
     class Meta:
         model = HardQuestion
         fields = [
-            'text'
+            'text',
+            'choices',
+
         ]
 
+class TestListCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = '__all__'
+        # exclude = ['difficulty']
 
-
-
-class TestListSerializer(serializers.ModelSerializer):
+class QuestionListSerializer(serializers.ModelSerializer):
     # xp = serializers.SerializerMethodField(read_only = True)
     easy_questions = EasyQuestionListSerializer(source = 'easyquestion_set', many=True, read_only=True)
     medium_questions = MediumQuestionListSerializer(source='mediumquestion_set', many=True, read_only=True)    

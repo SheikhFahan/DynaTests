@@ -8,7 +8,7 @@ const QuestionCard = () => {
 	const [score, setScore] = useState(0);
     const [loading , setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [answers, setAnswers] = useState({});
+    const [answers, setAnswers] = useState([]);
     const [questions, setQuestions] = useState([]);
 
     const easy_question_array = questions.easy_questions;
@@ -31,13 +31,35 @@ const QuestionCard = () => {
         });
     }, []);
       
-    function handleAnswers(questionId, choiceId) {
+    function handleAnswers(difficulty, choiceId) {
+        const newAnswer = {
+            difficulty: difficulty,
+            answer_id: choiceId,
+          };
+        setAnswers((prevAnswers) => [...prevAnswers, newAnswer]);
         
-        setAnswers((prevAnswers) => ({
-            ...prevAnswers,
-            [questionId] : choiceId,
-        }))
     }
+
+    const handleSubmitAnswers = async (e) => {
+        e.preventDefault();
+        const data = answers;
+        console.log(data);
+        try{
+            const response = await axios.post(
+                "http://127.0.0.1:8000/api/tests/submit_ans",
+                data,
+                {
+                    headers : {
+                        "Content-Type" : 'application/json'
+                    },
+                }
+            );
+            console.log("Response" , response.data)
+        } catch (error) {
+            console.error('Error:' , error);
+        }
+    };
+
      if(loading) {
         return <div>Loading...</div>
      }
@@ -65,13 +87,14 @@ const QuestionCard = () => {
                 {question.choices.map((choice) =>(
                     <button 
                         key={choice.id}
-                        onClick={()=> handleAnswers(question.pk, choice.pk)}
+                        onClick={()=> handleAnswers(choice.difficulty, choice.pk)}
                         >{choice.text}</button>
 
                 ))} 
             </div>             			
 		</div>
         ))}
+        <button onClick={handleSubmitAnswers}>Submit</button>
         </>
         )
     

@@ -7,25 +7,35 @@ from .models import (
     )
 
 class EasyChoiceSerializer(serializers.ModelSerializer):
+    difficulty = serializers.SerializerMethodField()
     class Meta:
         model = ChoiceForEasyQ
-        fields = ['pk', 'text', 'is_correct']
+        fields = ['pk', 'text', 'is_correct', 'difficulty']
+    
+    def get_difficulty(self, obj):
+        return "easy"
 
 class MediumChoiceSerializer(serializers.ModelSerializer):
+    difficulty = serializers.SerializerMethodField()
     class Meta:
         model = ChoiceForMediumQ
-        fields = ['pk', 'text', 'is_correct']
+        fields = ['pk', 'text', 'is_correct', 'difficulty']
+    
+    def get_difficulty(self, obj):
+        return "medium"
 
 class HardChoiceSerializer(serializers.ModelSerializer):
+    difficulty = serializers.SerializerMethodField()
     class Meta:
         model = ChoiceForHardQ
-        fields = ['pk', 'text', 'is_correct']
+        fields = ['pk', 'text', 'is_correct', 'difficulty']
+
+    def get_difficulty(self, obj):
+        return "hard"
 
 
 class EasyQuestionListSerializer(serializers.ModelSerializer):
     choices = EasyChoiceSerializer(source = 'choiceforeasyq_set', read_only = True, many =True)
-
-
     class Meta:
         model = EasyQuestion
         fields = [
@@ -56,7 +66,6 @@ class HardQuestionListSerializer(serializers.ModelSerializer):
             'pk',
             'text',
             'choices',
-
         ]
 
 class TestListCreateSerializer(serializers.ModelSerializer):
@@ -77,12 +86,12 @@ class QuestionListSerializer(serializers.ModelSerializer):
         fields = [
             'pk',
             'title',
-            'difficulty',
-            'description',
-            'category',
-            'test_file',
-            'created_at',
-            'updated_at',
+            # 'difficulty',
+            # 'description',
+            # 'category',
+            # 'test_file',
+            # 'created_at',
+            # 'updated_at',
             'easy_questions',
             'medium_questions',
             'hard_questions'
@@ -114,3 +123,8 @@ class QuestionListSerializer(serializers.ModelSerializer):
         representation['medium_questions'] = medium_questions_data
         representation['hard_questions'] = hard_questions_data
         return representation
+
+class AnswerSubmissionSerializer(serializers.Serializer):
+    difficulty = serializers.CharField()
+    answer_id = serializers.IntegerField()
+

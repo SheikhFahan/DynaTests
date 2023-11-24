@@ -9,17 +9,17 @@ from .models import (
 class EasyChoiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChoiceForEasyQ
-        fields = ['text', 'is_correct']
+        fields = ['pk', 'text', 'is_correct']
 
 class MediumChoiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChoiceForMediumQ
-        fields = ['text', 'is_correct']
+        fields = ['pk', 'text', 'is_correct']
 
 class HardChoiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChoiceForHardQ
-        fields = ['text', 'is_correct']
+        fields = ['pk', 'text', 'is_correct']
 
 
 class EasyQuestionListSerializer(serializers.ModelSerializer):
@@ -29,6 +29,7 @@ class EasyQuestionListSerializer(serializers.ModelSerializer):
     class Meta:
         model = EasyQuestion
         fields = [
+            'pk',
             'text',
             'choices',
         ]
@@ -40,6 +41,7 @@ class MediumQuestionListSerializer(serializers.ModelSerializer):
     class Meta:
         model = MediumQuestion
         fields = [
+            'pk',
             'text',
             'choices',
 
@@ -51,6 +53,7 @@ class HardQuestionListSerializer(serializers.ModelSerializer):
     class Meta:
         model = HardQuestion
         fields = [
+            'pk',
             'text',
             'choices',
 
@@ -95,7 +98,7 @@ class QuestionListSerializer(serializers.ModelSerializer):
         # total_questions = x
         # use total questions and xp to set the individual limit for the questions
 
-        limit = 2
+        limit = 5
         queryset1 = instance.easyquestion_set.all()[:limit]
         queryset2 = instance.mediumquestion_set.all()[:limit]
         queryset3 = instance.hardquestion_set.all()[:limit]

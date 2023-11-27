@@ -10,7 +10,7 @@ from .models import (
 from .serializers import (
     TestListCreateSerializer , EasyQuestionListSerializer, 
     MediumQuestionListSerializer, QuestionListSerializer,
-    AnswerSubmissionSerializer
+    DifficultySerializer
 )
 # Create your views here.
 
@@ -34,21 +34,32 @@ class MediumQuestionListAPIView(generics.ListAPIView):
 class SubmitAnswersAPIView(APIView):
     
     def post(self, request, *args, **kwargs):
-        serializer = AnswerSubmissionSerializer(data = request.data, many = True)
-        serializer.is_valid()
-        # print(serializer.errors)
-        validated_data = serializer.validated_data
+        serializer = DifficultySerializer(data = request.data)
+
+        if serializer.is_valid(raise_exception= True):
+            validated_data = serializer.validated_data
         # print(validated_data)
+        easy = validated_data['easy']
+        medium = validated_data['medium']
+        hard = validated_data['hard']
+        print(hard)
         try:
             print("answers")
-            for answer in validated_data:
-                difficulty = answer['difficulty']
+            for answer in easy:
                 choice_id = answer['answer_id']
-
-                if(difficulty == 'easy'):
-                    selected_choice = ChoiceForEasyQ.objects.get(pk = choice_id)
-                    is_correct = selected_choice.is_correct
-                    print(is_correct)
+                selected_choice = ChoiceForEasyQ.objects.get(pk = choice_id)
+                is_correct = selected_choice.is_correct
+                print(is_correct)
+            for answer in medium:
+                choice_id = answer['answer_id']
+                selected_choice = ChoiceForEasyQ.objects.get(pk = choice_id)
+                is_correct = selected_choice.is_correct
+                print(is_correct)
+            for answer in hard:
+                choice_id = answer['answer_id']
+                selected_choice = ChoiceForEasyQ.objects.get(pk = choice_id)
+                is_correct = selected_choice.is_correct
+                print(is_correct)
         except:
             return Response({'detail': 'Question or Choice does not exist'}, status=status.HTTP_404_NOT_FOUND)
         return Response(validated_data)

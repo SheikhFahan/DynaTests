@@ -107,7 +107,7 @@ class QuestionListSerializer(serializers.ModelSerializer):
         # total_questions = x
         # use total questions and xp to set the individual limit for the questions
 
-        limit = 5
+        limit = 2
         queryset1 = instance.easyquestion_set.all()[:limit]
         queryset2 = instance.mediumquestion_set.all()[:limit]
         queryset3 = instance.hardquestion_set.all()[:limit]
@@ -124,7 +124,15 @@ class QuestionListSerializer(serializers.ModelSerializer):
         representation['hard_questions'] = hard_questions_data
         return representation
 
-class AnswerSubmissionSerializer(serializers.Serializer):
-    difficulty = serializers.CharField()
+class AnswerSerializer(serializers.Serializer):
+    question_id = serializers.IntegerField()
     answer_id = serializers.IntegerField()
 
+class DifficultyAnswerSerializer(serializers.Serializer):
+    difficulty = serializers.CharField()
+    answers = AnswerSerializer(many=True)
+
+class DifficultySerializer(serializers.Serializer):
+    easy = serializers.ListField(child=serializers.DictField())
+    medium = serializers.ListField(child=serializers.DictField())
+    hard = serializers.ListField(child=serializers.DictField())

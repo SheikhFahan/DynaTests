@@ -78,6 +78,9 @@ class Test(models.Model):
                 choice_3 = ChoiceForHardQ.objects.get_or_create(question=question[0], text=choice3, is_correct=correct_answer == 'C')
                 choice_4 = ChoiceForHardQ.objects.get_or_create(question=question[0], text=choice4, is_correct=correct_answer == 'D')
 
+
+
+
 class EasyQuestion(models.Model):
     test = models.ForeignKey(Test, on_delete=models.CASCADE)
     text = models.TextField()
@@ -90,10 +93,6 @@ class EasyQuestion(models.Model):
     def __str__(self):
         return self.text[:50]
     
-    @property
-    def difficulty(self):
-        return "easy"
-    
 class MediumQuestion(models.Model):
     test = models.ForeignKey(Test, on_delete=models.CASCADE)
     text = models.TextField()
@@ -101,21 +100,12 @@ class MediumQuestion(models.Model):
     def __str__(self):
         return self.text[:50]
     
-    @property
-    def difficulty(self):
-        return "medium"
-    
 class HardQuestion(models.Model):
     test = models.ForeignKey(Test, on_delete=models.CASCADE)
     text = models.TextField()
 
     def __str__(self):
         return self.text[:50]
-    
-    @property
-    def difficulty(self):
-        return "hard"
-    
     
 class ChoiceForEasyQ(models.Model):
     question = models.ForeignKey(EasyQuestion, on_delete=models.CASCADE)
@@ -125,8 +115,6 @@ class ChoiceForEasyQ(models.Model):
     def __str__(self):
         return f"{self.question.text[:50]}, {self.text[:20]}"
     
-    
-    
 class ChoiceForMediumQ(models.Model):
     question = models.ForeignKey(MediumQuestion, on_delete=models.CASCADE)
     text = models.CharField(max_length=255)
@@ -135,8 +123,6 @@ class ChoiceForMediumQ(models.Model):
     def __str__(self):
         return f"{self.question.text[:50]}, {self.text[:20]}"
     
-    
-    
 class ChoiceForHardQ(models.Model):
     question = models.ForeignKey(HardQuestion, on_delete=models.CASCADE)
     text = models.CharField(max_length=255)
@@ -144,5 +130,6 @@ class ChoiceForHardQ(models.Model):
 
     def __str__(self):
         return f"{self.question.text[:50]}, {self.text[:20]}"
-
     
+
+# make changes in the database 

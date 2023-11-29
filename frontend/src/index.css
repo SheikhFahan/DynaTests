@@ -11,17 +11,10 @@ body {
   color: #ffffff;
 }
 
-body {
-  background-color: #7cc6fe;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-}
 
 .app {
   background-color: #252d4a;
-  width: 450px;
+  width: auto;
   min-height: 200px;
   height: min-content;
   border-radius: 15px;
@@ -29,7 +22,11 @@ body {
   box-shadow: 10px 10px 42px 0px rgba(0, 0, 0, 0.75);
   display: flex;
   justify-content: space-evenly;
+  margin: 10px;
+
 }
+
+
 
 .score-section {
   display: flex;
@@ -41,6 +38,7 @@ body {
 .question-section {
   width: 100%;
   position: relative;
+  
 }
 
 .question-count {
@@ -95,14 +93,14 @@ button {
   background-color: #ff3333;
 }
 
-button:hover {
+.card-button:hover {
   background-color: #555e7d;
 }
 
-button:focus {
+.card-button:focus {
   outline: none;
 }
 
-button svg {
+.card-button svg {
   margin-right: 5px;
 }

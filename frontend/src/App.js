@@ -15,21 +15,20 @@ import LoginPage from "./Pages/LoginPage";
 function App() {
   return (
     <>
-       <Router>
-       <AuthProvider>
+      <Router>
+        <AuthProvider>
           <NavbarComp />
           <Routes>
+          <Route index element={<Hero />}  />
             <Route element={<PrivateRoutes />}>
               <Route path="/test" element={<QuestionCard />} />
             </Route>
-          </Routes>
-          
-          <Routes>
-          <Route path="/login" element={<LoginPage />} />
-            <Route path="/" element={<Hero />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+
           </Routes>
         </AuthProvider>
-       </Router>
+      </Router>
     </>
   );
 }

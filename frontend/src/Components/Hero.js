@@ -1,8 +1,13 @@
 import React from 'react'
 
 const Hero = () => {
+    const divStyle = {
+        color: 'red',
+        fontSize: '18px',
+        textAlign: 'center',
+      };
   return (
-    <h3>This is the arrow function</h3>
+    <div style={divStyle}>This is the arrow function</div>
   )
 }
 

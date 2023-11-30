@@ -12,7 +12,7 @@ import AuthContext from '../Context/AuthContext'
 
 const NavbarComp = () => {
 // this line is breaking my code
-  let {name} = useContext(AuthContext);
+  let {user, logoutUser} = useContext(AuthContext);
   
 
 
@@ -40,6 +40,10 @@ const NavbarComp = () => {
           <Nav className="me-auto">
             <Nav.Link to="" as={Link}>Home</Nav.Link>
             <Nav.Link to="/test" as={Link}>Test</Nav.Link>
+            {!user && <Nav.Link to="/login" as={Link} className="mx-3">Login</Nav.Link>}
+            {!user && <Nav.Link to="/register" as={Link} className="mx-3">Register</Nav.Link>}
+
+
             <NavDropdown title="Dropdown" id="basic-nav-dropdown">
               <NavDropdown.Item to="" as={Link}>Action</NavDropdown.Item>
               <NavDropdown.Item to="" as={Link}>
@@ -51,7 +55,8 @@ const NavbarComp = () => {
                 Separated link
               </NavDropdown.Item>
             </NavDropdown>
-            <Nav.Link to="" as={Link}>{name}</Nav.Link>
+            {user && <Nav.Link className="mx-3">{user.username}</Nav.Link>}
+            {user && <Nav.Link to="/login" as={Link} className="mx-3" onClick={logoutUser}>logout</Nav.Link>}
           </Nav>
         </Navbar.Collapse>
       </Container>

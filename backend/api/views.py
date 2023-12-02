@@ -4,7 +4,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import generics, permissions
 
-from user_profiles.models import Profile
+from django.contrib.auth.models import User
 from .Serializers import UserSerializer
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -18,9 +18,8 @@ class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
 class UserCreateAPIView(generics.CreateAPIView):
-    queryset = Profile.objects.all()
+    queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAdminUser]
     
     def perform_create(self, serializer):
         print(serializer)

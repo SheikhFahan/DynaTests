@@ -7,7 +7,11 @@ from user_profiles.models import Profile
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = '__all__'
+        fields = [
+            'email',
+            'username',
+            'password'
+        ]
         extra_kwargs = {
             'password':{
                 'write_only': True
@@ -23,3 +27,4 @@ class UserSerializer(serializers.ModelSerializer):
             user = user,
             name = user.username
         )
+        return user

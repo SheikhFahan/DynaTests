@@ -56,7 +56,9 @@ const NavbarComp = () => {
               </NavDropdown.Item>
             </NavDropdown>
             {user && <Nav.Link className="mx-3">{user.username}</Nav.Link>}
-            {user && <Nav.Link to="/login" as={Link} className="mx-3" onClick={logoutUser}>logout</Nav.Link>}
+            {user && <Nav.Link to="/categories" as={Link} className="mx-3">Categories</Nav.Link>}
+            {user && <Nav.Link to="/logout" as={Link} className="mx-3" onClick={logoutUser}>logout</Nav.Link>}
+
           </Nav>
         </Navbar.Collapse>
       </Container>

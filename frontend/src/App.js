@@ -11,6 +11,7 @@ import AuthContext, { AuthProvider } from "./Context/AuthContext";
 import PrivateRoutes from "./Utils/PrivateRoutes";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from "./Pages/LoginPage";
+import CategoriesPage from "./Pages/CategoriesPage";
 
 function App() {
   return (
@@ -21,7 +22,9 @@ function App() {
           <Routes>
           <Route index element={<Hero />}  />
             <Route element={<PrivateRoutes />}>
+              <Route path='/categories' element={<CategoriesPage />} />;
               <Route path="/test" element={<QuestionCard />} />
+              <Route path='/dyn_test/:categoryId' element ={<QuestionCard />} />
             </Route>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />

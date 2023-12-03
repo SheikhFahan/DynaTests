@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useContext } from "react";
 import AuthContext from '../Context/AuthContext';
 import axios from "axios";
+import { useParams } from "react-router-dom";
 
 const QuestionCard = () => {
+  let {categoryId} = useParams();
+  console.log('categoryId', categoryId);
   // let {name} = useContext(AuthContext)
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [showScore, setShowScore] = useState(false);

@@ -1,14 +1,13 @@
 from django.urls import path
 from .views import (
-    TestListAPIView, EasyQuestionListAPIView,
+    CategoriesListAPIView, EasyQuestionListAPIView,
     MediumQuestionListAPIView, QuestionsRetrieveAPIView,
     SubmitAnswersAPIView
 )
 urlpatterns = [
-    path('list/',TestListAPIView.as_view() ),
+    path('categories/',CategoriesListAPIView.as_view() ),
     path('<int:pk>/get_test/',QuestionsRetrieveAPIView.as_view()),
-    path('eqs/', EasyQuestionListAPIView.as_view()),
-    path('mqs/', MediumQuestionListAPIView.as_view()),
     path('submit_ans', SubmitAnswersAPIView.as_view() ),
+
 
 ]

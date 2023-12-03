@@ -68,10 +68,13 @@ class HardQuestionListSerializer(serializers.ModelSerializer):
             'choices',
         ]
 
-class TestListCreateSerializer(serializers.ModelSerializer):
+class CategoryListCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = [
+            'pk',
+            'name'
+        ]
         # exclude = ['difficulty']
 
 class QuestionListSerializer(serializers.ModelSerializer):
@@ -124,6 +127,7 @@ class QuestionListSerializer(serializers.ModelSerializer):
         representation['hard_questions'] = hard_questions_data
         return representation
 
+# for accepting answers from the front end
 class AnswerSerializer(serializers.Serializer):
     question_id = serializers.IntegerField()
     answer_id = serializers.IntegerField()
@@ -136,3 +140,4 @@ class DifficultySerializer(serializers.Serializer):
     easy = serializers.ListField(child=serializers.DictField())
     medium = serializers.ListField(child=serializers.DictField())
     hard = serializers.ListField(child=serializers.DictField())
+

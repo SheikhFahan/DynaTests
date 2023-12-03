@@ -8,15 +8,16 @@ from .models import (
     ChoiceForEasyQ, ChoiceForHardQ, ChoiceForMediumQ
 )
 from .serializers import (
-    TestListCreateSerializer , EasyQuestionListSerializer, 
+    CategoryListCreateSerializer , EasyQuestionListSerializer, 
     MediumQuestionListSerializer, QuestionListSerializer,
     DifficultySerializer
 )
 # Create your views here.
 
-class TestListAPIView(generics.ListAPIView):
+class CategoriesListAPIView(generics.ListAPIView):
     queryset = Category.objects.all()
-    serializer_class = TestListCreateSerializer
+    serializer_class = CategoryListCreateSerializer
+
 
 class QuestionsRetrieveAPIView(generics.RetrieveAPIView):
     queryset = Test.objects.all()

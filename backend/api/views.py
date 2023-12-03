@@ -5,7 +5,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import generics, permissions
 
 from django.contrib.auth.models import User
-from .Serializers import UserSerializer
+from .serializers import UserSerializer
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod

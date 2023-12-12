@@ -5,6 +5,7 @@ import pandas as pd
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 
+from django.contrib.auth.models import User
 
 class Category(models.Model):
     name = models.CharField(max_length=15)
@@ -22,6 +23,8 @@ class Test(models.Model):
         ('medium', 'Medium'),
         ('hard', 'Hard'),
     ]
+    # change the blank field later
+    # user = models.ForeignKey(User, on_delete=models.CASCADE, blank = True)
     title = models.CharField(max_length=255)
     difficulty = models.CharField(max_length=10,choices= DIFFICULTY_CHOICES)
     description = models.TextField()
@@ -84,6 +87,13 @@ class Test(models.Model):
 class EasyQuestion(models.Model):
     test = models.ForeignKey(Test, on_delete=models.CASCADE)
     text = models.TextField()
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, null = True, blank = True, default= 'Coding')
+
+    def save(self, *args, **kwargs):
+        self.category = self.test.category
+        super().save(*args, **kwargs)
+
+
 
     # generic-foreign-key
     # content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
@@ -95,7 +105,12 @@ class EasyQuestion(models.Model):
     
 class MediumQuestion(models.Model):
     test = models.ForeignKey(Test, on_delete=models.CASCADE)
-    text = models.TextField()
+    text = models.TextField()    
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, null = True, blank = True, default= 'Coding')
+
+    def save(self, *args, **kwargs):
+        self.category = self.test.category
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.text[:50]
@@ -103,6 +118,11 @@ class MediumQuestion(models.Model):
 class HardQuestion(models.Model):
     test = models.ForeignKey(Test, on_delete=models.CASCADE)
     text = models.TextField()
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, null = True, blank = True, default= 'Coding')
+
+    def save(self, *args, **kwargs):
+        self.category = self.test.category
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.text[:50]

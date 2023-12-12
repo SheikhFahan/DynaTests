@@ -1,6 +1,7 @@
 from django.contrib import admin
 
-from .models import Profile, ExperiencePoints
+from .models import Profile, TestScoresLibrary, AverageScores
 
 admin.site.register(Profile)
-admin.site.register(ExperiencePoints)
+admin.site.register(TestScoresLibrary)
+admin.site.register(AverageScores)

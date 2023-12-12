@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from tests.models import Category
 
 
 class Profile(models.Model):
@@ -13,8 +14,24 @@ class Profile(models.Model):
             return self.name
         return 'learn to code first'
 
-class ExperiencePoints(models.Model):
-    title = models.CharField(max_length=30)
-    experience_points = models.IntegerField(default= 0)
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name= 'profile')
+class TestScoresLibrary(models.Model):
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    score = models.IntegerField()
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now=True)
+
+    @classmethod
+    def update_average_score(cls, profile, category):
+        avg_score = cls.objects.filter(category = category, profile = profile).aggregate(models.Avg('score'))['score_avg']
+        AverageScores.objects.update_or_create(profile= profile, category = category, defaults={'avg_score' : avg_score} )
+
+class AverageScores(models.Model):
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    avg_score = models.IntegerField()
+    timestamp = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['category', 'profile']
+
 

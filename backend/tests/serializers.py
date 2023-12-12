@@ -1,10 +1,15 @@
 from rest_framework import serializers
 
+from django.contrib.auth.models import User
+
 from .models import (
     Test, Category, EasyQuestion, MediumQuestion, 
     HardQuestion, ChoiceForEasyQ ,ChoiceForMediumQ, 
     ChoiceForHardQ,
     )
+
+from user_profiles.models import AverageScores
+
 
 class EasyChoiceSerializer(serializers.ModelSerializer):
     difficulty = serializers.SerializerMethodField()
@@ -42,6 +47,7 @@ class EasyQuestionListSerializer(serializers.ModelSerializer):
             'pk',
             'text',
             'choices',
+            'category'
         ]
 
     
@@ -89,12 +95,7 @@ class QuestionListSerializer(serializers.ModelSerializer):
         fields = [
             'pk',
             'title',
-            # 'difficulty',
-            # 'description',
-            # 'category',
-            # 'test_file',
-            # 'created_at',
-            # 'updated_at',
+            'category',
             'easy_questions',
             'medium_questions',
             'hard_questions'
@@ -102,6 +103,9 @@ class QuestionListSerializer(serializers.ModelSerializer):
         depth = 0
 
     def get_xp(self, instance):
+        # category = instance.category 
+        # user = User.objects.get(username = )
+        # avg_score = AverageScores.objects.get_or_create(category = category, profile = )
         pass
 
     def to_representation(self, instance):
@@ -114,6 +118,8 @@ class QuestionListSerializer(serializers.ModelSerializer):
         queryset1 = instance.easyquestion_set.all()[:limit]
         queryset2 = instance.mediumquestion_set.all()[:limit]
         queryset3 = instance.hardquestion_set.all()[:limit]
+        
+
 
         # Serialize the limited queryset
         easy_questions_data = EasyQuestionListSerializer(queryset1, many=True).data
@@ -122,10 +128,39 @@ class QuestionListSerializer(serializers.ModelSerializer):
         # Add the serialized data to the representation
         # representation = super(TestListSerializer, self).to_representation(instance)
         representation = super().to_representation(instance)
+        # category_name = Category.objects.get(id= instance.category)
+        # representation['category'] = CategoryListCreateSerializer(instance.category).data
         representation['easy_questions'] = easy_questions_data
         representation['medium_questions'] = medium_questions_data
         representation['hard_questions'] = hard_questions_data
+        # representation['total_questions'] = total_questions
         return representation
+    
+class QuestionSerializer(serializers.BaseSerializer):
+    # easy_questions = EasyQuestionListSerializer(source = 'easyquestion_set', many=True, read_only=True)
+    # medium_questions = MediumQuestionListSerializer(source='mediumquestion_set', many=True, read_only=True)    
+    # hard_questions = HardQuestionListSerializer(source='hardquestion_set', many=True, read_only=True)
+
+    # send the questions based on category
+    def to_representation(self, instance):
+        # instance is the queryset sent by the view
+        category = instance.category
+        
+        easy_questions = EasyQuestion.objects.filter(category = category)[:2]
+        medium_questions = MediumQuestion.objects.filter(category = category)[:2]
+        hard_questions = HardQuestion.objects.filter(category = category)[:2]
+
+        easy_serializer = EasyQuestionListSerializer(easy_questions, many = True, read_only = True)
+        medium_serializer = MediumQuestionListSerializer(medium_questions, many = True, read_only = True)
+        hard_serializer = HardQuestionListSerializer(hard_questions, many = True, read_only = True)
+
+        representation = {
+            'serialized_easy_questions': easy_serializer.data,
+            'serialized_medium_questions': medium_serializer.data,
+            'serialized_hard_questions': hard_serializer.data,
+        }
+        return representation
+    
 
 # for accepting answers from the front end
 class AnswerSerializer(serializers.Serializer):
@@ -137,6 +172,8 @@ class DifficultyAnswerSerializer(serializers.Serializer):
     answers = AnswerSerializer(many=True)
 
 class DifficultySerializer(serializers.Serializer):
+    question_count = serializers.IntegerField()
+    category = serializers.CharField()
     easy = serializers.ListField(child=serializers.DictField())
     medium = serializers.ListField(child=serializers.DictField())
     hard = serializers.ListField(child=serializers.DictField())

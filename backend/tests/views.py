@@ -33,6 +33,7 @@ class BetaQuestionsRetrieveAPIView(generics.ListAPIView):
     serializer_class = QuestionSerializer
     lookup_field = 'category'
 
+
     def get_queryset(self):
         category = self.request.query_params.get('category')
 
@@ -41,12 +42,23 @@ class BetaQuestionsRetrieveAPIView(generics.ListAPIView):
         category = int(category) if category.isdigit() else 1
 
         # Filter questions based on the category
-        easy_questions = EasyQuestion.objects.filter(category=category)[:2]
-        medium_questions = MediumQuestion.objects.filter(category=category)[:2]
-        hard_questions = HardQuestion.objects.filter(category=category)[:2]
+        easy_questions = EasyQuestion.objects.filter(category=category)[:1]
+        medium_questions = MediumQuestion.objects.filter(category=category)[:1]
+        hard_questions = HardQuestion.objects.filter(category=category)[:1]
 
-        combined_queryset = list(easy_questions) + list(medium_questions) + list(hard_questions)
-        return combined_queryset
+        questions_dict = {
+        'easy_questions': easy_questions,
+        'medium_questions': medium_questions,
+        'hard_questions': hard_questions,
+    }
+        
+        return questions_dict
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        instance = {'questions' : queryset}
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
 
 class EasyQuestionListAPIView(generics.ListAPIView):

@@ -47,7 +47,7 @@ class EasyQuestionListSerializer(serializers.ModelSerializer):
             'pk',
             'text',
             'choices',
-            'category'
+            'category',
         ]
 
     
@@ -60,6 +60,8 @@ class MediumQuestionListSerializer(serializers.ModelSerializer):
             'pk',
             'text',
             'choices',
+            'category',
+
 
         ]
 
@@ -72,6 +74,8 @@ class HardQuestionListSerializer(serializers.ModelSerializer):
             'pk',
             'text',
             'choices',
+            'category',
+
         ]
 
 class CategoryListCreateSerializer(serializers.ModelSerializer):
@@ -137,22 +141,16 @@ class QuestionListSerializer(serializers.ModelSerializer):
         return representation
     
 class QuestionSerializer(serializers.BaseSerializer):
-    # easy_questions = EasyQuestionListSerializer(source = 'easyquestion_set', many=True, read_only=True)
-    # medium_questions = MediumQuestionListSerializer(source='mediumquestion_set', many=True, read_only=True)    
-    # hard_questions = HardQuestionListSerializer(source='hardquestion_set', many=True, read_only=True)
 
     # send the questions based on category
     def to_representation(self, instance):
-        # instance is the queryset sent by the view
-        category = instance.category
-        
-        easy_questions = EasyQuestion.objects.filter(category = category)[:2]
-        medium_questions = MediumQuestion.objects.filter(category = category)[:2]
-        hard_questions = HardQuestion.objects.filter(category = category)[:2]
+        # instance is the queryset sent by the view 
+        print(instance)
 
-        easy_serializer = EasyQuestionListSerializer(easy_questions, many = True, read_only = True)
-        medium_serializer = MediumQuestionListSerializer(medium_questions, many = True, read_only = True)
-        hard_serializer = HardQuestionListSerializer(hard_questions, many = True, read_only = True)
+
+        easy_serializer = EasyQuestionListSerializer(instance['questions']['easy_questions'], many = True, read_only = True)
+        medium_serializer = MediumQuestionListSerializer(instance['questions']['medium_questions'], many = True, read_only = True)
+        hard_serializer = HardQuestionListSerializer(instance['questions']['hard_questions'], many = True, read_only = True)
 
         representation = {
             'serialized_easy_questions': easy_serializer.data,

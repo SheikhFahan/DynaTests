@@ -145,7 +145,6 @@ class QuestionSerializer(serializers.BaseSerializer):
     # send the questions based on category
     def to_representation(self, instance):
         # instance is the queryset sent by the view 
-        print(instance)
 
 
         easy_serializer = EasyQuestionListSerializer(instance['questions']['easy_questions'], many = True, read_only = True)

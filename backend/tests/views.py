@@ -25,21 +25,22 @@ class CategoriesListAPIView(generics.ListAPIView):
     serializer_class = CategoryListCreateSerializer
 
 
-class QuestionsRetrieveAPIView(generics.RetrieveAPIView):
+class ExQuestionsRetrieveAPIView(generics.RetrieveAPIView):
     queryset = Test.objects.all()
     serializer_class =QuestionListSerializer
 
-class BetaQuestionsRetrieveAPIView(generics.ListAPIView):
+class QuestionsRetrieveAPIView(generics.ListAPIView):
     serializer_class = QuestionSerializer
-    lookup_field = 'category'
 
 
     def get_queryset(self):
-        category = self.request.query_params.get('category')
+        # category = self.request.query_params.get('category')
+        category = self.kwargs['category']
+        print(self.kwargs)
 
         # Validate category or set a default value if needed
         # For example, setting category to 1 if not provided
-        category = int(category) if category.isdigit() else 1
+        # category = int(category) if category.isdigit() else 1
 
         # Filter questions based on the category
         easy_questions = EasyQuestion.objects.filter(category=category)[:1]

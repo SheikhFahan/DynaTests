@@ -4,9 +4,8 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 
 const QuestionCard = () => {
-  let {categoryId} = useParams();
-  console.log('categoryId', categoryId);
-  // let {name} = useContext(AuthContext)
+  let {categoryId} = useParams()
+  const {AuthTokens} = useContext(AuthContext)
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [showScore, setShowScore] = useState(false);
   const [score, setScore] = useState(0);
@@ -26,17 +25,18 @@ const QuestionCard = () => {
     medium: [...answersForMedium.medium],
     hard: [...answersForHard.hard],
   };
-  const [questions, setQuestions] = useState([]);
+  const [data, setData] = useState([]);
 
-  const easy_question_array = questions.easy_questions;
-  const medium_question_array = questions.medium_questions;
-  const difficult_question_array = questions.difficult_questions;
+  const easy_question_array = data.easy_questions;
+  const medium_question_array = data.medium_questions;
+  const difficult_question_array = data.difficult_questions;
 
   useEffect(() => {
     axios
-      .get("http://127.0.0.1:8000/api/tests/1/get_test/")
+      .get(`http://127.0.0.1:8000/api/tests/${categoryId}/get_test/`)
       .then((response) => {
-        setQuestions(response.data);
+        setData(response.data);
+        console.log(response)
         setLoading(false);
         // console.log(JSON.stringify(questions))
         // console.log("coming here ")
@@ -123,15 +123,18 @@ const QuestionCard = () => {
 
   const handleSubmitAnswers = async (e) => {
     e.preventDefault();
+    // const formData = new FormData();
+    // formData.append(allAnswers);
+    // formData.append()
     const data = allAnswers;
-    console.log(data);
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/tests/submit_ans",
+        "http://127.0.0.1:8000/api/tests/submit_ans/",
         data,
         {
           headers: {
             "Content-Type": "application/json",
+            Authorization : `Bearer ${AuthTokens.access}`,
           },
         }
       );
@@ -152,6 +155,7 @@ const QuestionCard = () => {
       {showScore} ? (
       <div className="score-section">You scored {score} out of</div>) : (
       <>
+        <h1>{data.category}</h1>
         {easy_question_array.map((question) => (
           <div className="app" key={question.id}>
             <div className="question-section">

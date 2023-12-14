@@ -152,9 +152,9 @@ class QuestionSerializer(serializers.BaseSerializer):
         hard_serializer = HardQuestionListSerializer(instance['questions']['hard_questions'], many = True, read_only = True)
 
         representation = {
-            'serialized_easy_questions': easy_serializer.data,
-            'serialized_medium_questions': medium_serializer.data,
-            'serialized_hard_questions': hard_serializer.data,
+            'easy_questions': easy_serializer.data,
+            'medium_questions': medium_serializer.data,
+            'hard_questions': hard_serializer.data,
         }
         return representation
     
@@ -168,10 +168,22 @@ class DifficultyAnswerSerializer(serializers.Serializer):
     difficulty = serializers.CharField()
     answers = AnswerSerializer(many=True)
 
-class DifficultySerializer(serializers.Serializer):
-    question_count = serializers.IntegerField()
-    category = serializers.CharField()
+class ChoicesSerializer(serializers.Serializer):
+    # for the choices as answers of the test from the front-end
     easy = serializers.ListField(child=serializers.DictField())
     medium = serializers.ListField(child=serializers.DictField())
     hard = serializers.ListField(child=serializers.DictField())
+
+class QuestionsCountSerializer(serializers.Serializer):
+    # total number of questions in the test for evaluations of marks percentage w.r.t total 
+    count_easy = serializers.IntegerField()
+    count_medium = serializers.IntegerField()
+    count_hard = serializers.IntegerField()
+
+class SubmitAnswersSerializer(serializers.Serializer):
+    # recieves marked choices and total questions from the front-end
+    count = QuestionsCountSerializer()
+    choices = ChoicesSerializer()
+
+
 

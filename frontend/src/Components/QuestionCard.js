@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useContext } from "react";
-import AuthContext from '../Context/AuthContext';
+import AuthContext from "../Context/AuthContext";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { json, useParams } from "react-router-dom";
 
 const QuestionCard = () => {
-  let {categoryId} = useParams()
-  const {AuthTokens} = useContext(AuthContext)
+  let { categoryId } = useParams();
+  const { AuthTokens } = useContext(AuthContext);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [showScore, setShowScore] = useState(false);
   const [score, setScore] = useState(0);
@@ -20,23 +20,36 @@ const QuestionCard = () => {
   const [answersForHard, setAnswersForHard] = useState({
     hard: [],
   });
+  const [data, setData] = useState([]);
+
   const allAnswers = {
     easy: [...answersForEasy.easy],
     medium: [...answersForMedium.medium],
     hard: [...answersForHard.hard],
   };
-  const [data, setData] = useState([]);
+
+  const [questionsCount, setQuestionsCount] = useState({
+    count_easy : 0,
+    count_medium : 0,
+    count_hard :0
+  })
+
 
   const easy_question_array = data.easy_questions;
   const medium_question_array = data.medium_questions;
-  const difficult_question_array = data.difficult_questions;
+  const hard_question_array = data.hard_questions;
 
   useEffect(() => {
     axios
       .get(`http://127.0.0.1:8000/api/tests/${categoryId}/get_test/`)
       .then((response) => {
         setData(response.data);
-        console.log(response)
+        console.log(response);
+        setQuestionsCount({
+          count_easy : response.data.easy_questions.length,
+          count_medium : response.data.medium_questions.length,
+          count_hard : response.data.hard_questions.length
+        })
         setLoading(false);
         // console.log(JSON.stringify(questions))
         // console.log("coming here ")
@@ -123,10 +136,11 @@ const QuestionCard = () => {
 
   const handleSubmitAnswers = async (e) => {
     e.preventDefault();
-    // const formData = new FormData();
-    // formData.append(allAnswers);
-    // formData.append()
-    const data = allAnswers;
+    const data = {
+      choices: JSON.stringify(allAnswers),
+      count: JSON.stringify(questionsCount)
+    };
+    
     try {
       const response = await axios.post(
         "http://127.0.0.1:8000/api/tests/submit_ans/",
@@ -134,7 +148,7 @@ const QuestionCard = () => {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization : `Bearer ${AuthTokens.access}`,
+            Authorization: `Bearer ${AuthTokens.access}`,
           },
         }
       );
@@ -179,7 +193,7 @@ const QuestionCard = () => {
           </div>
         ))}
 
-        {easy_question_array.map((question) => (
+        {medium_question_array.map((question) => (
           <div className="app" key={question.id}>
             <div className="question-section">
               <div className="question-count">
@@ -201,7 +215,7 @@ const QuestionCard = () => {
             </div>
           </div>
         ))}
-        {easy_question_array.map((question) => (
+        {hard_question_array.map((question) => (
           <div className="app" key={question.id}>
             <div className="question-section">
               <div className="question-count">

@@ -135,8 +135,10 @@ class SubmitAnswersAPIView(APIView):
 
             score_percentage = (score/total_score) *100
             test_lib = TestScoresLibrary.objects.create(profile = profile, score = score_percentage, category = category )
+            if score_percentage > 40:
+                test_lib.update_average_score(profile= profile, category=category)
             
-        except:
+            
+        except :
             return Response({'detail': 'Question or Choice does not exist'}, status=status.HTTP_404_NOT_FOUND)
-
         return Response(validated_data)

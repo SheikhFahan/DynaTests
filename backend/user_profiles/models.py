@@ -22,8 +22,11 @@ class TestScoresLibrary(models.Model):
 
     @classmethod
     def update_average_score(cls, profile, category):
-        avg_score = cls.objects.filter(category = category, profile = profile).aggregate(models.Avg('score'))['score_avg']
+        avg_score = cls.objects.filter(category = category, profile = profile).aggregate(models.Avg('score'))['score__avg']
         AverageScores.objects.update_or_create(profile= profile, category = category, defaults={'avg_score' : avg_score} )
+
+    def __str__(self) :
+        return f"{self.profile.name}, {self.category}, {self.score}"
 
 class AverageScores(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
@@ -33,5 +36,8 @@ class AverageScores(models.Model):
 
     class Meta:
         unique_together = ['category', 'profile']
+
+    def __str__(self) :
+        return f"{self.profile.name}, {self.category}, {self.avg_score}"
 
 

@@ -9,11 +9,11 @@ import json
 
 from django.contrib.auth.models import User
 
-from user_profiles.models import Profile, AverageScores, TestScoresLibrary
+from user_profiles.models import Profile, AverageScore, TestScoresLibrary
 
 from .models import (
     Test , EasyQuestion, MediumQuestion, Category,
-    ChoiceForEasyQ, ChoiceForHardQ, ChoiceForMediumQ, HardQuestion
+    ChoiceForEasyQ, ChoiceForHardQ, ChoiceForMediumQ, HardQuestion, 
 )
 from .serializers import (
     CategoryListCreateSerializer, SubmitAnswersSerializer,
@@ -26,16 +26,56 @@ class CategoriesListAPIView(generics.ListAPIView):
     serializer_class = CategoryListCreateSerializer
 
 class QuestionsRetrieveAPIView(generics.ListAPIView):
-
+    # --bug gets called twice
+    # send questions dynamically based on the category
     serializer_class = QuestionSerializer
 
-    def get_queryset(self):
+    all_test_lenghts = {
+            'Coding' : 20,
+            'Design' : 10
+        }
+    weight_ranges = {
+            (0, 50): {'easy': 6, 'medium': 3, 'hard': 1},
+            (50, 80): {'easy': 5, 'medium': 4, 'hard': 1},
+            (80, 100): {'easy': 4, 'medium': 4, 'hard': 2},
+        }
+
+    
+    def get_counts(self, user_score, total_questions_count):
+        for score_range, weights in self.weight_ranges.items():
+            if score_range[0] <= user_score < score_range[1]:
+                easy_weight, medium_weight, hard_weight = weights['easy'], weights['medium'], weights['hard']
+                break
+        else:
+            # Default weights if the user's score doesn't fall into any defined range
+            easy_weight, medium_weight, hard_weight = 5, 4, 1
+
+        # Calculate the number of questions to send for each category based on weights and test length
+        # Set the desired total number of questions
+
+        easy_questions_count = int((easy_weight/(easy_weight + medium_weight + hard_weight)*total_questions_count))
+        medium_questions_count = int((medium_weight/(easy_weight + medium_weight + hard_weight)*total_questions_count))
+        hard_questions_count = int((hard_weight/(easy_weight + medium_weight + hard_weight)*total_questions_count))
+        print(hard_questions_count, easy_questions_count, medium_questions_count)
+
+        return easy_questions_count, medium_questions_count, hard_questions_count
+    
+    def get_queryset(self, request):
         # category of the test
         category = self.kwargs['category']
+        category_name = Category.objects.get(pk = category).name
+        print(category_name)
+        test_length = self.all_test_lenghts.get(category_name, 0)
+        profile = Profile.objects.get(user =request.user)
+        avg_score_object = AverageScore.objects.get(profile = profile, category = category)
+        avg_score = avg_score_object.avg_score
+        print(avg_score, test_length)
 
-        easy_questions = EasyQuestion.objects.filter(category=category)[:1]
-        medium_questions = MediumQuestion.objects.filter(category=category)[:1]
-        hard_questions = HardQuestion.objects.filter(category=category)[:1]
+        easy_count , medium_count, hard_count = self.get_counts(avg_score, test_length)
+
+        easy_questions = EasyQuestion.objects.filter(category=category).order_by('?')[:easy_count]
+        medium_questions = MediumQuestion.objects.filter(category=category).order_by('?')[:medium_count]
+        hard_questions = HardQuestion.objects.filter(category=category).order_by('?')[:hard_count]
 
         questions_dict = {
         'easy_questions': easy_questions,
@@ -46,7 +86,8 @@ class QuestionsRetrieveAPIView(generics.ListAPIView):
         return questions_dict
     
     def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
+        print(request)
+        queryset = self.get_queryset(request=request)
         instance = {'questions' : queryset}
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
@@ -93,7 +134,6 @@ class SubmitAnswersAPIView(APIView):
         # evaluates the choices selected for the answers
         # suggestion send the choices directly instead of sending them as (easy, mid, hard) and get the difficulty in the backend 
         data = request.data
-        # print(data)
         data['choices'] = json.loads(data['choices'])
         data['count'] = json.loads(data['count'])
 

@@ -8,7 +8,7 @@ from .models import (
     ChoiceForHardQ,
     )
 
-from user_profiles.models import AverageScores
+from user_profiles.models import AverageScore
 
 
 class EasyChoiceSerializer(serializers.ModelSerializer):
@@ -93,7 +93,6 @@ class QuestionListSerializer(serializers.ModelSerializer):
     medium_questions = MediumQuestionListSerializer(source='mediumquestion_set', many=True, read_only=True)    
     hard_questions = HardQuestionListSerializer(source='hardquestion_set', many=True, read_only=True)
 
-
     class Meta:
         model = Test
         fields = [
@@ -117,7 +116,6 @@ class QuestionListSerializer(serializers.ModelSerializer):
         # xp
         # total_questions = x
         # use total questions and xp to set the individual limit for the questions
-
         limit = 2
         queryset1 = instance.easyquestion_set.all()[:limit]
         queryset2 = instance.mediumquestion_set.all()[:limit]
@@ -145,7 +143,6 @@ class QuestionSerializer(serializers.BaseSerializer):
     # send the questions based on category
     def to_representation(self, instance):
         # instance is the queryset sent by the view 
-
 
         easy_serializer = EasyQuestionListSerializer(instance['questions']['easy_questions'], many = True, read_only = True)
         medium_serializer = MediumQuestionListSerializer(instance['questions']['medium_questions'], many = True, read_only = True)

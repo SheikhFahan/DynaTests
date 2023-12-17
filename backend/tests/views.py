@@ -9,7 +9,7 @@ import json
 
 from django.contrib.auth.models import User
 
-from user_profiles.models import Profile, AverageScore, TestScoresLibrary
+from user_profiles.models import Profile, AverageScore, TestScoresLibrary , TestMarksLibrary
 
 from .models import (
     Test , EasyQuestion, MediumQuestion, Category,
@@ -30,6 +30,7 @@ class QuestionsRetrieveAPIView(generics.ListAPIView):
     # send questions dynamically based on the category
     serializer_class = QuestionSerializer
 
+    # make this field dynamic in future
     all_test_lenghts = {
             'Coding' : 20,
             'Design' : 10
@@ -50,9 +51,7 @@ class QuestionsRetrieveAPIView(generics.ListAPIView):
             # Default weights if the user's score doesn't fall into any defined range
             easy_weight, medium_weight, hard_weight = 5, 4, 1
 
-        # Calculate the number of questions to send for each category based on weights and test length
-        # Set the desired total number of questions
-
+        # formula for getting the number of questions per category for the test
         easy_questions_count = int((easy_weight/(easy_weight + medium_weight + hard_weight)*total_questions_count))
         medium_questions_count = int((medium_weight/(easy_weight + medium_weight + hard_weight)*total_questions_count))
         hard_questions_count = int((hard_weight/(easy_weight + medium_weight + hard_weight)*total_questions_count))
@@ -64,7 +63,6 @@ class QuestionsRetrieveAPIView(generics.ListAPIView):
         # category of the test
         category = self.kwargs['category']
         category_name = Category.objects.get(pk = category).name
-        print(category_name)
         test_length = self.all_test_lenghts.get(category_name, 0)
         profile = Profile.objects.get(user =request.user)
         avg_score_object = AverageScore.objects.get(profile = profile, category = category)
@@ -174,6 +172,7 @@ class SubmitAnswersAPIView(APIView):
                     score+=self.scoring['hard']
 
             score_percentage = (score/total_score) *100
+            TestMarksLibrary.objects.create(profile = profile, score = score, category = category)
             test_lib = TestScoresLibrary.objects.create(profile = profile, score = score_percentage, category = category )
             if score_percentage > 40:
                 test_lib.update_average_score(profile= profile, category=category)

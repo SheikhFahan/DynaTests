@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from tests.models import Category
 
+# change profile to user as the foreign key relation
+
 
 class Profile(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='auth_user')
@@ -39,5 +41,13 @@ class AverageScore(models.Model):
 
     def __str__(self) :
         return f"{self.profile.name}, {self.category}, {self.avg_score}"
+    
+class TestMarksLibrary(models.Model):
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    score = models.IntegerField()
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+
+    def __str__(self) :
+        return f"{self.profile.name}, {self.category}, {self.score}"
 
 

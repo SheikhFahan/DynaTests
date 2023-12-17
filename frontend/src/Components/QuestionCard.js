@@ -41,7 +41,11 @@ const QuestionCard = () => {
 
   useEffect(() => {
     axios
-      .get(`http://127.0.0.1:8000/api/tests/${categoryId}/get_test/`)
+      .get(`http://127.0.0.1:8000/api/tests/${categoryId}/get_test/`, {
+        headers: {
+          Authorization: `Bearer ${AuthTokens.access}`,
+        },
+      })
       .then((response) => {
         setData(response.data);
         console.log(response);

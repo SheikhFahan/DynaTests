@@ -49,13 +49,13 @@ const NavbarComp = () => {
               <NavDropdown.Item to="" as={Link}>
                 Another action
               </NavDropdown.Item>
-              <NavDropdown.Item to="" as={Link}>Something</NavDropdown.Item>
+              <NavDropdown.Item as={Link}>Something</NavDropdown.Item>
               <NavDropdown.Divider />
               <NavDropdown.Item to="">
                 Separated link
               </NavDropdown.Item>
             </NavDropdown>
-            {user && <Nav.Link className="mx-3">{user.username}</Nav.Link>}
+            {user && <Nav.Link to="/profile"  as={Link} className="mx-3">{user.username}</Nav.Link>}
             {user && <Nav.Link to="/categories" as={Link} className="mx-3">Categories</Nav.Link>}
             {user && <Nav.Link to="/logout" as={Link} className="mx-3" onClick={logoutUser}>logout</Nav.Link>}
 

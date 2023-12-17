@@ -12,6 +12,7 @@ import PrivateRoutes from "./Utils/PrivateRoutes";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from "./Pages/LoginPage";
 import CategoriesPage from "./Pages/CategoriesPage";
+import ProfileCard from "./Pages/ProfilePage";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
             <Route element={<PrivateRoutes />}>
               <Route path='/categories' element={<CategoriesPage />} />;
               <Route path="/test" element={<QuestionCard />} />
+              <Route path="/profile" element={<ProfileCard/>} />
               <Route path='/dyn_test/:categoryId' element ={<QuestionCard />} />
             </Route>
             <Route path="/login" element={<LoginPage />} />

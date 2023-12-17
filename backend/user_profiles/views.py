@@ -7,7 +7,7 @@ from django.http import JsonResponse
 from tests.serializers import CategoryListCreateSerializer
 from tests.models import Category
 
-from .serializers import  UserProfileSerializer , CustomCategorySerializer
+from .serializers import  UserProfileSerializer, TestMarksLibraryListSerializer
 from .models import TestMarksLibrary, Profile, AverageScore
 
 class ProfileRetrieveAPIView(generics.RetrieveAPIView):
@@ -48,3 +48,13 @@ class CategoryRetrieveSerializer(generics.ListAPIView):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many = True)
         return Response(serializer.data)
+    
+class TestMarksLibraryListAPIView(generics.ListAPIView):
+    serializer_class = TestMarksLibraryListSerializer
+
+    def get_queryset(self):
+        category = self.kwargs['category']
+        user = self.request.user
+        profile  = Profile.objects.get(user =1)
+        marks_lib = TestMarksLibrary.objects.filter(profile = profile, category = category)
+        return marks_lib

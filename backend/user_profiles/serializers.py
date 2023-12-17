@@ -13,5 +13,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'phone'
         ]
 
-class CustomCategorySerializer(serializers.Serializer):
-    category = serializers.IntegerField()
+class TestMarksLibraryListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TestMarksLibrary
+        fields = [
+            'score',
+            'timestamp'
+        ]
+

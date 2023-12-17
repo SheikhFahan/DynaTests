@@ -46,6 +46,7 @@ class TestMarksLibrary(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     score = models.IntegerField()
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now=True)
 
     def __str__(self) :
         return f"{self.profile.name}, {self.category}, {self.score}"

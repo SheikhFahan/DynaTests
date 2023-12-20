@@ -17,7 +17,7 @@ class ProfileRetrieveAPIView(generics.RetrieveAPIView):
     def get_object(self):
         
         user = self.request.user
-        profile = Profile.objects.get(user = 1)
+        profile = Profile.objects.get(user = user)
         # obj = generics.get_object_or_404(queryset, profile)
         # self.check_object_permissions(self.request, obj)
         return profile
@@ -28,19 +28,22 @@ class CategoryRetrieveSerializer(generics.ListAPIView):
 
     def get_category_list(self, qs):
         list_of_dicts = []
+        print(qs)
         for object in qs:
             for k in object:
                 name = Category.objects.get(pk = object[k]).name
                 new_dict = {'name': name , 'pk': object[k]}
                 list_of_dicts.append(new_dict)
+        
         return list_of_dicts
         
     
     def get_queryset(self):
         user = self.request.user
-        profile = Profile.objects.get(user = 1)
+        profile = Profile.objects.get(user = user)
         # gets the categories from the tests the user has attempted
-        categories = AverageScore.objects.filter(profile = profile).values('category').distinct()
+        categories = AverageScore.objects.filter(profile = profile).values('category')
+        print(AverageScore.objects.all())
         category_list = self.get_category_list(categories)
         return category_list
     
@@ -55,6 +58,6 @@ class TestMarksLibraryListAPIView(generics.ListAPIView):
     def get_queryset(self):
         category = self.kwargs['category']
         user = self.request.user
-        profile  = Profile.objects.get(user =1)
+        profile  = Profile.objects.get(user =user)
         marks_lib = TestMarksLibrary.objects.filter(profile = profile, category = category)
         return marks_lib

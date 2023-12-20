@@ -14,10 +14,12 @@ from user_profiles.models import Profile, AverageScore, TestScoresLibrary , Test
 from .models import (
     Test , EasyQuestion, MediumQuestion, Category,
     ChoiceForEasyQ, ChoiceForHardQ, ChoiceForMediumQ, HardQuestion, 
+    CombinedTestCategory
 )
 from .serializers import (
     CategoryListCreateSerializer, SubmitAnswersSerializer,
-      CategoryListCreateSerializer, QuestionSerializer
+    CategoryListCreateSerializer, QuestionSerializer,
+    CombinationTestSerializer
 )
 # Create your views here.
 
@@ -25,6 +27,48 @@ class CategoriesListAPIView(generics.ListAPIView):
     queryset = Category.objects.all()
     serializer_class = CategoryListCreateSerializer
 
+class CombinationTestListCreateAPIView(generics.ListCreateAPIView):
+    queryset = CombinedTestCategory.objects.all()
+    serializer_class = CombinationTestSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(user = self.request.user)
+
+class CombinationTestQuestionsListSerializerAPIView(generics.ListAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategoryListCreateSerializer
+    # serializer_class = QuestionSerializer
+    # queryset = CombinedTestCategory.objects.all()
+
+    all_test_lenghts = {
+        'DemoCombination' : 10,
+    }
+    weight_ranges = {
+            (0, 50): {'easy': 6, 'medium': 3, 'hard': 1},
+            (50, 80): {'easy': 5, 'medium': 4, 'hard': 1},
+            (80, 100): {'easy': 4, 'medium': 4, 'hard': 2},
+        }
+
+
+    def get_sub_categories(self, category_id):
+        sub_categories = CombinedTestCategory.objects.get(pk = category_id).associated_categories.all()
+        for i in sub_categories:
+            print(i.pk)
+        return sub_categories
+        
+    def get_queryset(self):
+        category_id = self.kwargs['category']
+        category_name = CombinedTestCategory.objects.get(pk = category_id).name
+        sub_categories = self.get_sub_categories(category_id)
+        print(sub_categories)
+
+        test_length = self.all_test_lenghts.get(category_name, 0)
+        profile = Profile.objects.get(user = 1)
+
+        return super().get_queryset()
+
+
+        
 class QuestionsRetrieveAPIView(generics.ListAPIView):
     # --bug gets called twice
     # send questions dynamically based on the category
@@ -32,8 +76,11 @@ class QuestionsRetrieveAPIView(generics.ListAPIView):
 
     # make this field dynamic in future
     all_test_lenghts = {
-            'Coding' : 20,
-            'Design' : 10
+            'Coding' : 15,
+            'Design' : 10,
+            'General' : 10,
+            'Interview' : 10,
+            'KCET' : 10,
         }
     weight_ranges = {
             (0, 50): {'easy': 6, 'medium': 3, 'hard': 1},
@@ -55,7 +102,7 @@ class QuestionsRetrieveAPIView(generics.ListAPIView):
         easy_questions_count = int((easy_weight/(easy_weight + medium_weight + hard_weight)*total_questions_count))
         medium_questions_count = int((medium_weight/(easy_weight + medium_weight + hard_weight)*total_questions_count))
         hard_questions_count = int((hard_weight/(easy_weight + medium_weight + hard_weight)*total_questions_count))
-        print(hard_questions_count, easy_questions_count, medium_questions_count)
+        print(easy_questions_count, medium_questions_count, hard_questions_count)
 
         return easy_questions_count, medium_questions_count, hard_questions_count
     
@@ -65,8 +112,11 @@ class QuestionsRetrieveAPIView(generics.ListAPIView):
         category_name = Category.objects.get(pk = category).name
         test_length = self.all_test_lenghts.get(category_name, 0)
         profile = Profile.objects.get(user =request.user)
-        avg_score_object = AverageScore.objects.get(profile = profile, category = category)
-        avg_score = avg_score_object.avg_score
+        try:
+            avg_score_object = AverageScore.objects.get(profile=profile, category=category)
+            avg_score = avg_score_object.avg_score
+        except AverageScore.DoesNotExist:
+            avg_score = 60
         print(avg_score, test_length)
 
         easy_count , medium_count, hard_count = self.get_counts(avg_score, test_length)
@@ -176,8 +226,11 @@ class SubmitAnswersAPIView(APIView):
             test_lib = TestScoresLibrary.objects.create(profile = profile, score = score_percentage, category = category )
             if score_percentage > 40:
                 test_lib.update_average_score(profile= profile, category=category)
-            
-            
         except :
             return Response({'detail': 'Question or Choice does not exist'}, status=status.HTTP_404_NOT_FOUND)
-        return Response(validated_data)
+        print(round(score_percentage, 2))
+        return Response(round(score_percentage, 2))
+    
+
+
+

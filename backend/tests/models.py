@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from django.db import models
 import pandas as pd
 
@@ -18,6 +19,7 @@ class Category(models.Model):
 
 
 class Test(models.Model):
+    # add user to it    
     DIFFICULTY_CHOICES = [
         ('easy', 'Easy'),
         ('medium', 'Medium'),
@@ -152,4 +154,14 @@ class ChoiceForHardQ(models.Model):
         return f"{self.question.text[:50]}, {self.text[:20]}"
     
 
-# make changes in the database 
+class CombinedTestCategory(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null = True)
+    name = models.CharField(max_length= 20)
+    associated_categories = models.ManyToManyField(Category)
+
+    def get_username(self):
+        return  str(self.user.username)
+
+    def __str__(self) -> str:
+        return self.name
+    

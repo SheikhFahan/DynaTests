@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from .models import (
     Test, Category, EasyQuestion, MediumQuestion, 
     HardQuestion, ChoiceForEasyQ ,ChoiceForMediumQ, 
-    ChoiceForHardQ,
+    ChoiceForHardQ, CombinedTestCategory
     )
 
 from user_profiles.models import AverageScore
@@ -86,6 +86,34 @@ class CategoryListCreateSerializer(serializers.ModelSerializer):
             'name'
         ]
         # exclude = ['difficulty']
+
+class TestCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Test
+        fields =  [
+            'title',
+            'difficulty',
+            'description',
+            'category',
+            'test_file',
+
+        ]
+
+class CombinationTestSerializer(serializers.ModelSerializer):
+    username = serializers.SerializerMethodField(read_only = True)
+    class Meta:
+        model = CombinedTestCategory
+        fields = [
+            'pk',
+            'username',
+            'name',
+            'associated_categories'
+        ]
+
+    def get_username(self, obj):
+        return obj.get_username()
+
+
 
 class QuestionListSerializer(serializers.ModelSerializer):
     # xp = serializers.SerializerMethodField(read_only = True)

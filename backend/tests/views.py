@@ -41,7 +41,8 @@ class CombinationTestQuestionsListSerializerAPIView(generics.ListAPIView):
     # queryset = CombinedTestCategory.objects.all()
 
     all_test_lenghts = {
-        'DemoCombination' : 10,
+        # 1 -> for demo combination
+        1 : 10,
     }
     weight_ranges = {
             (0, 50): {'easy': 6, 'medium': 3, 'hard': 1},
@@ -49,24 +50,106 @@ class CombinationTestQuestionsListSerializerAPIView(generics.ListAPIView):
             (80, 100): {'easy': 4, 'medium': 4, 'hard': 2},
         }
 
+    def get_counts(self, user_score, total_questions_count):
+        print(user_score, total_questions_count)
+        for score_range, weights in self.weight_ranges.items():
+            if score_range[0] <= user_score < score_range[1]:
+                easy_weight, medium_weight, hard_weight = weights['easy'], weights['medium'], weights['hard']
+                break
+        else:
+            # Default weights if the user's score doesn't fall into any defined range
+            easy_weight, medium_weight, hard_weight = 5, 4, 1
+
+        # formula for getting the number of questions per category for the test
+        easy_questions_count = int((easy_weight/(easy_weight + medium_weight + hard_weight)*total_questions_count))
+        medium_questions_count = int((medium_weight/(easy_weight + medium_weight + hard_weight)*total_questions_count))
+        hard_questions_count = int((hard_weight/(easy_weight + medium_weight + hard_weight)*total_questions_count))
+        # print(easy_questions_count, medium_questions_count, hard_questions_count, 'questions_count')
+
+        return easy_questions_count, medium_questions_count, hard_questions_count
 
     def get_sub_categories(self, category_id):
         sub_categories = CombinedTestCategory.objects.get(pk = category_id).associated_categories.all()
-        for i in sub_categories:
-            print(i.pk)
-        return sub_categories
+        sub_categories_list = [i.pk for i in sub_categories]
+        return sub_categories_list
         
-    def get_queryset(self):
-        category_id = self.kwargs['category']
-        category_name = CombinedTestCategory.objects.get(pk = category_id).name
-        sub_categories = self.get_sub_categories(category_id)
-        print(sub_categories)
-
-        test_length = self.all_test_lenghts.get(category_name, 0)
+    
+    def get_avg_scores(self, sub_categories_ids):
+        scores_dict = {}
+        score_sum = 0
+        user = self.request.user
         profile = Profile.objects.get(user = 1)
 
+        for sub_category in sub_categories_ids:
+            average_score = AverageScore.objects.get(profile = profile, category =  sub_category).avg_score
+            scores_dict[sub_category] = average_score
+            score_sum += average_score
+        
+        # print(scores_dict)
+        return scores_dict, score_sum
+
+    def get_count_per_category(self, scores_dict, score_sum, test_length):
+        counts = {}
+        sum = 0
+        for item in scores_dict:
+            proportion_item = scores_dict[item]/score_sum
+            print(proportion_item, item, test_length)
+            counts[item] = round(proportion_item * test_length)
+        for item in counts:
+            sum += counts[item]
+            print(sum, "sum is")
+        if sum < test_length:
+            # get the score with the least value
+            min_key = min(scores_dict, key= scores_dict.get)
+        while(sum < test_length):
+            counts[min_key] +=1
+            sum += 1 
+        print(counts, 'counts')
+        return counts
+
+    def get_queryset(self):
+        # breaks the paper on the basis of three avg scores
+        category_id = self.kwargs['category']
+        sub_categories_ids = self.get_sub_categories(category_id)
+        questions_dict = {}
+        scores, score_sum = self.get_avg_scores(sub_categories_ids)
+        test_length = self.all_test_lenghts.get(category_id, 0)
+        self.get_count_per_category(scores_dict=scores, score_sum= score_sum, test_length= test_length)
+
+        
+        for category in sub_categories_ids:
+            test_length = self.all_test_lenghts.get(category_id, 0)        
+            profile = Profile.objects.get(user = 1)
+            try:
+                average_score_object = AverageScore.objects.get(profile = profile, category =  category)
+                average_score = average_score_object.avg_score
+            except AverageScore.DoesNotExist:
+                average_score = 60
+            
+            easy_count, medium_count, hard_count = self.get_counts(average_score, test_length)
+            
+            easy_questions = EasyQuestion.objects.filter(category=category_id).order_by('?')[:easy_count]
+            medium_questions = MediumQuestion.objects.filter(category=category_id).order_by('?')[:medium_count]
+            hard_questions = HardQuestion.objects.filter(category=category_id).order_by('?')[:hard_count]
+
+            questions_dict[category_id] = {
+                'easy_questions': easy_questions,
+                'medium_questions': medium_questions,
+                'hard_questions': hard_questions,
+            }
         return super().get_queryset()
 
+
+    
+    
+    def list(self, request, *args, **kwargs):
+        xqueryset = self.get_queryset()
+
+        xinstance = {'question' : xqueryset}
+        xserializer = self.get_serializer(xinstance)
+        print(xserializer.data)
+        # return serializer.data
+        return super().list(request, *args, **kwargs)
 
         
 class QuestionsRetrieveAPIView(generics.ListAPIView):
@@ -110,12 +193,14 @@ class QuestionsRetrieveAPIView(generics.ListAPIView):
         # category of the test
         category = self.kwargs['category']
         category_name = Category.objects.get(pk = category).name
+        # make it get it with the id insted of the category name
         test_length = self.all_test_lenghts.get(category_name, 0)
         profile = Profile.objects.get(user =request.user)
         try:
             avg_score_object = AverageScore.objects.get(profile=profile, category=category)
             avg_score = avg_score_object.avg_score
         except AverageScore.DoesNotExist:
+            # store this else where
             avg_score = 60
         print(avg_score, test_length)
 

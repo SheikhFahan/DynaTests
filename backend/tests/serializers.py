@@ -166,11 +166,30 @@ class QuestionListSerializer(serializers.ModelSerializer):
         # representation['total_questions'] = total_questions
         return representation
     
+
+class CategorizedQuestionSerializer(serializers.BaseSerializer):
+    def to_representation(self, instance):
+        category_data = {}
+        for category_id, question_data in instance.items():
+            easy_serializer = EasyQuestionListSerializer(question_data['easy_questions'], many = True, read_only = True)
+            medium_serializer = MediumQuestionListSerializer(question_data['medium_questions'], many = True, read_only = True)
+            hard_serializer = HardQuestionListSerializer(question_data['hard_questions'], many = True, read_only = True)
+
+            category_data[category_id] = {
+                'easy_questions' : easy_serializer.data,
+                'medium_questions': medium_serializer.data,
+                'hard_questions': hard_serializer.data,
+            }
+        
+
+        return category_data
+
 class QuestionSerializer(serializers.BaseSerializer):
 
     # send the questions based on category
     def to_representation(self, instance):
         # instance is the queryset sent by the view 
+        print(instance.items())
 
         easy_serializer = EasyQuestionListSerializer(instance['questions']['easy_questions'], many = True, read_only = True)
         medium_serializer = MediumQuestionListSerializer(instance['questions']['medium_questions'], many = True, read_only = True)

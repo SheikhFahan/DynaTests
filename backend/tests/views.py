@@ -19,7 +19,7 @@ from .models import (
 from .serializers import (
     CategoryListCreateSerializer, SubmitAnswersSerializer,
     CategoryListCreateSerializer, QuestionSerializer,
-    CombinationTestSerializer
+    CombinationTestSerializer, CategorizedQuestionSerializer
 )
 # Create your views here.
 
@@ -35,8 +35,7 @@ class CombinationTestListCreateAPIView(generics.ListCreateAPIView):
         serializer.save(user = self.request.user)
 
 class CombinationTestQuestionsListSerializerAPIView(generics.ListAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategoryListCreateSerializer
+    serializer_class = CategorizedQuestionSerializer
     # serializer_class = QuestionSerializer
     # queryset = CombinedTestCategory.objects.all()
 
@@ -51,7 +50,6 @@ class CombinationTestQuestionsListSerializerAPIView(generics.ListAPIView):
         }
 
     def get_counts(self, user_score, total_questions_count):
-        print(user_score, total_questions_count, "score and count")
 
         for score_range, weights in self.weight_ranges.items():
             if score_range[0] <= user_score < score_range[1]:
@@ -75,9 +73,7 @@ class CombinationTestQuestionsListSerializerAPIView(generics.ListAPIView):
         easy_questions_count = max(easy_questions_count, 1)
         medium_questions_count = max(medium_questions_count, 1)
         hard_questions_count = max(hard_questions_count, 1)
-        print(easy_questions_count, medium_questions_count, hard_questions_count, "questions_count")
 
-        # print(easy_questions_count, medium_questions_count, hard_questions_count, 'questions_count')
         return easy_questions_count, medium_questions_count, hard_questions_count
     def get_sub_categories(self, category_id):
         sub_categories = CombinedTestCategory.objects.get(pk = category_id).associated_categories.all()
@@ -96,7 +92,6 @@ class CombinationTestQuestionsListSerializerAPIView(generics.ListAPIView):
             scores_dict[sub_category] = average_score
             score_sum += average_score
         
-        # print(scores_dict)
         return scores_dict, score_sum
 
     def get_count_per_category(self, scores_dict, score_sum, test_length):
@@ -149,19 +144,19 @@ class CombinationTestQuestionsListSerializerAPIView(generics.ListAPIView):
                 'medium_questions': medium_questions,
                 'hard_questions': hard_questions,
             }
-        return super().get_queryset()
+        print(questions_dict, "this is questions dict")
+        return questions_dict
 
 
     
     
     def list(self, request, *args, **kwargs):
-        xqueryset = self.get_queryset()
+        queryset = self.get_queryset()
 
-        xinstance = {'question' : xqueryset}
-        xserializer = self.get_serializer(xinstance)
-        print(xserializer.data)
-        # return serializer.data
-        return super().list(request, *args, **kwargs)
+        # instance = {'question' : queryset}
+        serializer = self.get_serializer(queryset)
+        # print(serializer.data)
+        return Response(serializer.data)
 
         
 class QuestionsRetrieveAPIView(generics.ListAPIView):
@@ -227,7 +222,7 @@ class QuestionsRetrieveAPIView(generics.ListAPIView):
         'medium_questions': medium_questions,
         'hard_questions': hard_questions,
     }
-        
+        print(questions_dict)
         return questions_dict
     
     def list(self, request, *args, **kwargs):

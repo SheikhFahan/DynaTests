@@ -51,7 +51,8 @@ class CombinationTestQuestionsListSerializerAPIView(generics.ListAPIView):
         }
 
     def get_counts(self, user_score, total_questions_count):
-        print(user_score, total_questions_count)
+        print(user_score, total_questions_count, "score and count")
+
         for score_range, weights in self.weight_ranges.items():
             if score_range[0] <= user_score < score_range[1]:
                 easy_weight, medium_weight, hard_weight = weights['easy'], weights['medium'], weights['hard']
@@ -60,14 +61,24 @@ class CombinationTestQuestionsListSerializerAPIView(generics.ListAPIView):
             # Default weights if the user's score doesn't fall into any defined range
             easy_weight, medium_weight, hard_weight = 5, 4, 1
 
-        # formula for getting the number of questions per category for the test
-        easy_questions_count = int((easy_weight/(easy_weight + medium_weight + hard_weight)*total_questions_count))
-        medium_questions_count = int((medium_weight/(easy_weight + medium_weight + hard_weight)*total_questions_count))
-        hard_questions_count = int((hard_weight/(easy_weight + medium_weight + hard_weight)*total_questions_count))
+        # Formula for getting the number of questions per category for the test
+        total_weight = easy_weight + medium_weight + hard_weight
+        if total_weight == 0:
+            # Avoid division by zero
+            return 0, 0, 0
+
+        easy_questions_count = int((easy_weight / total_weight) * total_questions_count)
+        medium_questions_count = int((medium_weight / total_weight) * total_questions_count)
+        hard_questions_count = int((hard_weight / total_weight) * total_questions_count)
+
+        # Ensure at least one question per category
+        easy_questions_count = max(easy_questions_count, 1)
+        medium_questions_count = max(medium_questions_count, 1)
+        hard_questions_count = max(hard_questions_count, 1)
+        print(easy_questions_count, medium_questions_count, hard_questions_count, "questions_count")
+
         # print(easy_questions_count, medium_questions_count, hard_questions_count, 'questions_count')
-
         return easy_questions_count, medium_questions_count, hard_questions_count
-
     def get_sub_categories(self, category_id):
         sub_categories = CombinedTestCategory.objects.get(pk = category_id).associated_categories.all()
         sub_categories_list = [i.pk for i in sub_categories]
@@ -89,22 +100,21 @@ class CombinationTestQuestionsListSerializerAPIView(generics.ListAPIView):
         return scores_dict, score_sum
 
     def get_count_per_category(self, scores_dict, score_sum, test_length):
+        # gets the questions from each category based on the user score
         counts = {}
         sum = 0
         for item in scores_dict:
             proportion_item = scores_dict[item]/score_sum
-            print(proportion_item, item, test_length)
             counts[item] = round(proportion_item * test_length)
         for item in counts:
             sum += counts[item]
-            print(sum, "sum is")
         if sum < test_length:
             # get the score with the least value
             min_key = min(scores_dict, key= scores_dict.get)
         while(sum < test_length):
             counts[min_key] +=1
             sum += 1 
-        print(counts, 'counts')
+        print(counts, "counts")
         return counts
 
     def get_queryset(self):
@@ -114,7 +124,8 @@ class CombinationTestQuestionsListSerializerAPIView(generics.ListAPIView):
         questions_dict = {}
         scores, score_sum = self.get_avg_scores(sub_categories_ids)
         test_length = self.all_test_lenghts.get(category_id, 0)
-        self.get_count_per_category(scores_dict=scores, score_sum= score_sum, test_length= test_length)
+        # gets the number of questions per category
+        questions_count = self.get_count_per_category(scores_dict=scores, score_sum= score_sum, test_length= test_length)
 
         
         for category in sub_categories_ids:
@@ -126,13 +137,14 @@ class CombinationTestQuestionsListSerializerAPIView(generics.ListAPIView):
             except AverageScore.DoesNotExist:
                 average_score = 60
             
-            easy_count, medium_count, hard_count = self.get_counts(average_score, test_length)
+            easy_count, medium_count, hard_count = self.get_counts(average_score, questions_count[category])
+            print(easy_count, medium_count, hard_count , " for ", category, "length = ", questions_count[category])
             
             easy_questions = EasyQuestion.objects.filter(category=category_id).order_by('?')[:easy_count]
             medium_questions = MediumQuestion.objects.filter(category=category_id).order_by('?')[:medium_count]
             hard_questions = HardQuestion.objects.filter(category=category_id).order_by('?')[:hard_count]
 
-            questions_dict[category_id] = {
+            questions_dict[category] = {
                 'easy_questions': easy_questions,
                 'medium_questions': medium_questions,
                 'hard_questions': hard_questions,
@@ -159,7 +171,7 @@ class QuestionsRetrieveAPIView(generics.ListAPIView):
 
     # make this field dynamic in future
     all_test_lenghts = {
-            'Coding' : 15,
+            'Coding' : 10,
             'Design' : 10,
             'General' : 10,
             'Interview' : 10,

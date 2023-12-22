@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useContext } from "react";
 import AuthContext from "../Context/AuthContext";
 import axios from "axios";
-import { json, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
-const QuestionCard = () => {
+const CombinationQuestions = () => {
   let { categoryId } = useParams();
   const { AuthTokens } = useContext(AuthContext);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -40,22 +40,30 @@ const QuestionCard = () => {
 
   useEffect(() => {
     axios
-      .get(`http://127.0.0.1:8000/api/tests/${categoryId}/get_test/`, {
+      .get(`http://127.0.0.1:8000/api/tests/${categoryId}/get_comb_test/`, {
         headers: {
           Authorization: `Bearer ${AuthTokens.access}`,
         },
       })
       .then((response) => {
-        setData(response.data);
-        console.log(response);
-        setQuestionsCount({
-          count_easy: response.data.easy_questions.length,
-          count_medium: response.data.medium_questions.length,
-          count_hard: response.data.hard_questions.length,
-        });
+        const test_data =  response.data;
+        // console.log(response.data);
+        const newQuestions = {};
+
+        for (const key in test_data) {
+          const categoryData = test_data[key];
+          
+          newQuestions[key] = {
+            easy_questions : categoryData.easy_questions || [],
+            medium_questions : categoryData.medium_questions || [],
+            hard_questions : categoryData.hard_questions || [],
+
+          }
+        }
+        setData(newQuestions);
         setLoading(false);
-        // console.log(JSON.stringify(questions))
-        // console.log("coming here ")
+
+
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -64,6 +72,8 @@ const QuestionCard = () => {
       });
   }, []);
 
+
+console.log(data)
   const handleEasyAnswers = (questionId, choiceId) => {
     setAnswersForEasy((prevAnswers) => {
       const existingAnswerIndex = prevAnswers["easy"].findIndex(
@@ -174,74 +184,81 @@ const QuestionCard = () => {
       <div className="score-section">You scored {showScore} out of 100</div>) : (
       <>
         <h1>{data.category}</h1>
-        {easy_question_array.map((question) => (
-          <div className="app" key={question.id}>
-            <div className="question-section">
-              <div className="question-count">
-                <span>Question x  </span>
-                <br></br>
-              </div>
-              <div className="question-text">question {question.text}</div>
-            </div>
-            <div className="answer-section">
-              {question.choices.map((choice) => (
-                <button
-                  className="card-button"
-                  key={choice.id}
-                  onClick={() => handleEasyAnswers(question.pk, choice.pk)}
-                >
-                  {choice.text}
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
+        {Object.keys(data).map((categoryKey) => (
+           <div key={categoryKey}>
+            <span>{categoryKey}</span>
+           {data[categoryKey].easy_questions.map((question) => (
+             <div className="app" key={question.id}>
+               <div className="question-section">
+                 <div className="question-count">
+                   <span>Question x </span>
+                   <br />
+                 </div>
+                 <div className="question-text">{question.text}</div>
+               </div>
+               <div className="answer-section">
+                 {question.choices.map((choice) => (
+                   <button
+                     className="card-button"
+                     key={choice.id}
+                     onClick={() => handleEasyAnswers(categoryKey, 'easy', question.pk, choice.pk)}
+                   >
+                     {choice.text}
+                   </button>
+                 ))}
+               </div>
+             </div>
+           ))}
+       
+           {data[categoryKey].medium_questions.map((question) => (
+             <div className="app" key={question.id}>
+               <div className="question-section">
+                 <div className="question-count">
+                   <span>Question x </span>
+                   <br />
+                 </div>
+                 <div className="question-text">{question.text}</div>
+               </div>
+               <div className="answer-section">
+                 {question.choices.map((choice) => (
+                   <button
+                     className="card-button"
+                     key={choice.id}
+                     onClick={() => handleMediumAnswers(categoryKey, 'medium', question.pk, choice.pk)}
+                   >
+                     {choice.text}
+                   </button>
+                 ))}
+               </div>
+             </div>
+           ))}
+       
+           {data[categoryKey].hard_questions.map((question) => (
+             <div className="app" key={question.id}>
+               <div className="question-section">
+                 <div className="question-count">
+                   <span>Question x </span>
+                   <br />
+                 </div>
+                 <div className="question-text">{question.text}</div>
+               </div>
+               <div className="answer-section">
+                 {question.choices.map((choice) => (
+                   <button
+                     className="card-button"
+                     key={choice.id}
+                     onClick={() => handleHardAnswers(categoryKey, 'hard', question.pk, choice.pk)}
+                   >
+                     {choice.text}
+                   </button>
+                 ))}
+               </div>
+             </div>
+           ))}
+         </div>
+        ))
 
-        {medium_question_array.map((question) => (
-          <div className="app" key={question.id}>
-            <div className="question-section">
-              <div className="question-count">
-                <span>Question x </span>
-                <br></br>
-              </div>
-              <div className="question-text">{question.text}</div>
-            </div>
-            <div className="answer-section">
-              {question.choices.map((choice) => (
-                <button
-                  className="card-button"
-                  key={choice.id}
-                  onClick={() => handleMediumAnswers(question.pk, choice.pk)}
-                >
-                  {choice.text}
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
-        {hard_question_array.map((question) => (
-          <div className="app" key={question.id}>
-            <div className="question-section">
-              <div className="question-count">
-                <span>Question x </span>
-                <br></br>
-              </div>
-              <div className="question-text">question {question.text}</div>
-            </div>
-            <div className="answer-section">
-              {question.choices.map((choice) => (
-                <button
-                  className="card-button"
-                  key={choice.id}
-                  onClick={() => handleHardAnswers(question.pk, choice.pk)}
-                >
-                  {choice.text}
-                </button>
-              ))}
-            </div>
-      
-          </div>
-        ))}
+        }
       
         <button onClick={handleSubmitAnswers}>Submit</button>
       </>
@@ -251,4 +268,4 @@ const QuestionCard = () => {
   );
 };
 
-export default QuestionCard;
+export default CombinationQuestions;

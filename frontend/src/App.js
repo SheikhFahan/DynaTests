@@ -13,6 +13,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from "./Pages/LoginPage";
 import CategoriesPage from "./Pages/CategoriesPage";
 import ProfileCard from "./Pages/ProfilePage";
+import CombinationQuestions from "./Components/CombinationQuestions";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
       <Router>
         <AuthProvider>
           <NavbarComp />
+          
           <Routes>
           <Route index element={<Hero />}  />
             <Route element={<PrivateRoutes />}>
@@ -27,6 +29,8 @@ function App() {
               <Route path="/test" element={<QuestionCard />} />
               <Route path="/profile" element={<ProfileCard/>} />
               <Route path='/dyn_test/:categoryId' element ={<QuestionCard />} />
+              <Route path='/comb_dyn_test/:categoryId' element ={<CombinationQuestions />} />
+
             </Route>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />

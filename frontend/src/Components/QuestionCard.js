@@ -140,8 +140,8 @@ const QuestionCard = () => {
   const handleSubmitAnswers = async (e) => {
     e.preventDefault();
     const data = {
-      choices: JSON.stringify(allAnswers),
-      count: JSON.stringify(questionsCount),
+      choices: allAnswers,
+      count: questionsCount,
     };
 
     try {

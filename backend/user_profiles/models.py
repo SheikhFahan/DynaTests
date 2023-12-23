@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from tests.models import Category
+from tests.models import Category, CombinedTestCategory
 
 # change profile to user as the foreign key relation
 
@@ -51,4 +51,13 @@ class TestMarksLibrary(models.Model):
     def __str__(self) :
         return f"{self.profile.name}, {self.category}, {self.score}"
 
+
+class CombinedTestScoresLibrary(models.Model):
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    score = models.IntegerField()
+    category = models.ForeignKey(CombinedTestCategory, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now=True)
+
+    def __str__(self) :
+        return f"{self.profile.name}, {self.category}, {self.score}"
 

@@ -9,7 +9,7 @@ import json
 
 from django.contrib.auth.models import User
 
-from user_profiles.models import Profile, AverageScore, TestScoresLibrary , TestMarksLibrary
+from user_profiles.models import Profile, AverageScore, TestScoresLibrary , TestMarksLibrary, CombinedTestScoresLibrary
 
 from .models import (
     Test , EasyQuestion, MediumQuestion, Category,
@@ -135,9 +135,9 @@ class CombinationTestQuestionsListSerializerAPIView(generics.ListAPIView):
             easy_count, medium_count, hard_count = self.get_counts(average_score, questions_count[category])
             print(easy_count, medium_count, hard_count , " for ", category, "length = ", questions_count[category])
             
-            easy_questions = EasyQuestion.objects.filter(category=category_id).order_by('?')[:easy_count]
-            medium_questions = MediumQuestion.objects.filter(category=category_id).order_by('?')[:medium_count]
-            hard_questions = HardQuestion.objects.filter(category=category_id).order_by('?')[:hard_count]
+            easy_questions = EasyQuestion.objects.filter(category=category).order_by('?')[:easy_count]
+            medium_questions = MediumQuestion.objects.filter(category=category).order_by('?')[:medium_count]
+            hard_questions = HardQuestion.objects.filter(category=category).order_by('?')[:hard_count]
 
             questions_dict[category] = {
                 'easy_questions': easy_questions,
@@ -232,6 +232,105 @@ class QuestionsRetrieveAPIView(generics.ListAPIView):
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
+class SubmitCombinationAnswersAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    scoring = {
+        'easy': 5,
+        'medium' : 7,
+        'hard' : 10
+    }
+
+    # max score of the test
+    def get_max_total_score(self, count):
+        total_score = 0
+        for category, count_dict in count.items():
+            for key , value in count_dict.items():
+                if key == 'count_easy':
+                    total_score += value * self.scoring['easy']
+                elif key == 'count_medium':
+                    total_score += value * self.scoring['medium']
+                elif key == 'count_hard':
+                    total_score += value * self.scoring['hard']
+        return total_score
+    
+    def get_total_score(self, count):
+        # max score of the test
+        total_score = 0
+        for key in count:
+            if key == 'count_easy':
+                total_score += count['count_easy'] * self.scoring['easy']
+            elif key == 'count_medium':
+                total_score += count['count_medium'] * self.scoring['medium']
+            elif key == 'count_hard':
+                total_score += count['count_hard'] * self.scoring['hard']
+        return total_score
+
+    def post(self, request, *args, **kwargs):
+        data = request.data
+        user = request.user
+        profile = Profile.objects.get(user = user)
+
+        # answers dict
+        all_answers = data['answers']
+        # total number of questions in the dict
+        questions_count_dict = data['count']
+        combined_category = data['category']
+        combined_category_instance = CombinedTestCategory.objects.get(pk = combined_category)
+        # max score possible for the whole test
+        max_total_score = self.get_max_total_score(questions_count_dict)
+
+        # total_score scored by the user in the test
+        total_score = 0
+        # iterates the data by category
+        for category, answer_set in all_answers.items():
+            print(category, "this is category")
+            # total score scored per category
+            total_category_score = 0
+            # iterates the data by difficulty
+            for answer_difficulty in answer_set:
+                if answer_difficulty == 'easy':
+                    # iterates the data by question_id and choice_id
+                    for question_id , choice_id in answer_set[answer_difficulty].items():
+                        selected_choice = ChoiceForEasyQ.objects.get(pk = choice_id)
+                        if selected_choice.is_correct:
+                             total_category_score+= self.scoring['easy']
+                             print('correct easy', total_category_score)
+
+
+                elif answer_difficulty == 'medium':
+                    for question_id , choice_id in answer_set[answer_difficulty].items():
+                        selected_choice = ChoiceForMediumQ.objects.get(pk = choice_id)
+                        if selected_choice.is_correct:
+                             total_category_score+= self.scoring['medium']
+                             print('correct medium', total_category_score)
+
+
+                elif answer_difficulty == 'hard':
+                    for question_id , choice_id in answer_set[answer_difficulty].items():
+                        selected_choice = ChoiceForHardQ.objects.get(pk = choice_id)
+                        if selected_choice.is_correct:
+                             total_category_score+= self.scoring['hard']
+                             print('correct hard', total_category_score)
+
+
+
+            # max score per category for the test
+            max_category_score = self.get_total_score(questions_count_dict[category])
+            # total score scored by the user for the test
+            total_score += total_category_score
+            score_percentage = (total_category_score/max_category_score) *100
+            # the below line might work for the tests for the students under the college
+            # test_lib = TestScoresLibrary.objects.create(profile = profile, score = round(score_percentage, 2), category = category)
+            # if score_percentage > 40:
+            #     test_lib.update_average_score(profile= profile, category=category)
+        total_score_percentage = (total_score/max_total_score) *100
+        test_lib = CombinedTestScoresLibrary.objects.create(profile = profile, score = round(total_score_percentage, 2), category = combined_category_instance)
+
+        print(total_score, "this is the total score")
+        print(max_total_score, "this is the max total score")
+        return Response(total_score_percentage)
+
+
 class SubmitAnswersAPIView(APIView):
     # dependencies (category, questions, number of questions)
     # check for answers, update the avg score, update the score
@@ -239,7 +338,6 @@ class SubmitAnswersAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     
     # change this as a dynamic field depending on the actual test
-    total_questions = 25
     scoring = {
         'easy': 5,
         'medium' : 7,
@@ -274,8 +372,7 @@ class SubmitAnswersAPIView(APIView):
         # evaluates the choices selected for the answers
         # suggestion send the choices directly instead of sending them as (easy, mid, hard) and get the difficulty in the backend 
         data = request.data
-        data['choices'] = json.loads(data['choices'])
-        data['count'] = json.loads(data['count'])
+        
 
         serializer = SubmitAnswersSerializer(data =data)
 
@@ -322,7 +419,3 @@ class SubmitAnswersAPIView(APIView):
             return Response({'detail': 'Question or Choice does not exist'}, status=status.HTTP_404_NOT_FOUND)
         print(round(score_percentage, 2))
         return Response(round(score_percentage, 2))
-    
-
-
-

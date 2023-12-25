@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'api',
     'tests',
     'user_profiles',
+    'group_tests',
     # restframework
     'rest_framework',
     'rest_framework_simplejwt',

@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from tests.models import Category, CombinedTestCategory
 
+from group_tests.models import GroupTestCategory
+
 # change profile to user as the foreign key relation
 
 
@@ -25,11 +27,12 @@ class TestScoresLibrary(models.Model):
     @classmethod
     def update_average_score(cls, profile, category):
         avg_score = cls.objects.filter(category = category, profile = profile).aggregate(models.Avg('score'))['score__avg']
-        AverageScore.objects.update_or_create(profile= profile, category = category, defaults={'avg_score' : avg_score} )
+        AverageScore.objects.update_or_create(profile= profile, category = category, defaults={'avg_ascore' : avg_score} )
 
     def __str__(self) :
         return f"{self.profile.name}, {self.category}, {self.score}"
-
+    
+    
 class AverageScore(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)

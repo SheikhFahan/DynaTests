@@ -14,7 +14,7 @@ class GroupTestCategory(models.Model):
     name = models.CharField(max_length=15)
 
     class Meta:
-        verbose_name_plural = 'Categories'
+        verbose_name_plural = 'Group Test Categories'
 
     def __str__(self):
         return self.name

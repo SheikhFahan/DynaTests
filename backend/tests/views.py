@@ -209,7 +209,6 @@ class QuestionsRetrieveAPIView(generics.ListAPIView):
         except AverageScore.DoesNotExist:
             # store this else where
             avg_score = 60
-        print(avg_score, test_length)
 
         easy_count , medium_count, hard_count = self.get_counts(avg_score, test_length)
 
@@ -222,11 +221,9 @@ class QuestionsRetrieveAPIView(generics.ListAPIView):
         'medium_questions': medium_questions,
         'hard_questions': hard_questions,
     }
-        print(questions_dict)
         return questions_dict
     
     def list(self, request, *args, **kwargs):
-        print(request)
         queryset = self.get_queryset(request=request)
         instance = {'questions' : queryset}
         serializer = self.get_serializer(instance)
@@ -415,6 +412,8 @@ class SubmitAnswersAPIView(APIView):
             test_lib = TestScoresLibrary.objects.create(profile = profile, score = score_percentage, category = category )
             if score_percentage > 40:
                 test_lib.update_average_score(profile= profile, category=category)
+                print("coming here")
+
         except :
             return Response({'detail': 'Question or Choice does not exist'}, status=status.HTTP_404_NOT_FOUND)
         print(round(score_percentage, 2))

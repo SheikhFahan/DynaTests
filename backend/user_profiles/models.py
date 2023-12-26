@@ -27,7 +27,7 @@ class TestScoresLibrary(models.Model):
     @classmethod
     def update_average_score(cls, profile, category):
         avg_score = cls.objects.filter(category = category, profile = profile).aggregate(models.Avg('score'))['score__avg']
-        AverageScore.objects.update_or_create(profile= profile, category = category, defaults={'avg_ascore' : avg_score} )
+        AverageScore.objects.update_or_create(profile= profile, category = category, defaults={'avg_score' : avg_score} )
 
     def __str__(self) :
         return f"{self.profile.name}, {self.category}, {self.score}"

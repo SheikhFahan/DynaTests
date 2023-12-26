@@ -1,9 +1,11 @@
 from django.urls import path, include
 
-from .views import GroupTestCreateAPIView, QuestionsRetrieveAPIView
+from .views import GroupTestCreateAPIView, QuestionsRetrieveAPIView, SubmitAnswersAPIView
 
 urlpatterns = [
     path('create_group_test', GroupTestCreateAPIView.as_view()),
     path('<int:category>/get_test/',QuestionsRetrieveAPIView.as_view()), 
+    path('submit_ans/', SubmitAnswersAPIView.as_view() ),
+
 
 ]

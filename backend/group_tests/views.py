@@ -3,26 +3,64 @@ from rest_framework.response import Response
 from rest_framework.views import APIView     
 from rest_framework import permissions
 
-from .serializers import GroupTestSerializer
+from .serializers import GroupTestSerializer, CategorySerializer, PasswordSerializer
 from .models import GroupTest
 
 from .models import (
     GroupTestCategory, EasyQuestion, MediumQuestion, HardQuestion,
-    ChoiceForEasyQ, ChoiceForHardQ, ChoiceForMediumQ
+    ChoiceForEasyQ, ChoiceForHardQ, ChoiceForMediumQ, TestPassword
 )
 
+from django.contrib.auth.hashers import make_password
+
 from user_profiles.models import Profile, AverageScore, TestMarksLibrary, TestScoresLibrary
+from user_profiles.user_group_models import GroupTestAverageScore, GroupTestMarksLibrary, GroupTestScoresLibrary
 from tests.serializers import QuestionSerializer, SubmitAnswersSerializer
 
 class GroupTestCreateAPIView(generics.CreateAPIView):
     serializer_class = GroupTestSerializer
     queryset = GroupTest.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        group_test_object = serializer.save(user=self.request.user)
+
+        # Include the 'pk' of the created object in the response incase password in needed to be saved
+        response_data = {
+            'pk': group_test_object.pk,
+            'message': 'Test created successfully.',
+        }
+        return Response(response_data, status=status.HTTP_201_CREATED)
 
 
+class PasswordCreateAPIView(generics.CreateAPIView):
+    # saves the password for the tests which have is_password == True
+    serializer_class = PasswordSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def perform_create(self, serializer):
+        # get this after the test object is created
+        test_id =  self.kwargs['test_id']
+        
+        try:
+            test_object = GroupTest.objects.get(pk=test_id)
+        except GroupTestCategory.DoesNotExist:
+            return Response({"error": "Invalid category_id"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if TestPassword.objects.filter(test=test_object).exists():
+            return Response({"error": "Password already exists for this test"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        data = self.request.data
+        hashed_password = make_password(data.get("password"))
+
+        serializer.save(test = test_object, password = hashed_password)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class QuestionsRetrieveAPIView(generics.ListAPIView):
-    # --bug gets called twice
-    # send questions dynamically based on the category
+    """
+    similar to QuestionsREtrieveAPIView in 'tests': reason for not importing that was the use of tables add making that 
+    dynamic adds unnecessary complexity and makes the code slower because of more is_instance() checks
+    """
     serializer_class = QuestionSerializer
 
     # make this field dynamic in future
@@ -91,10 +129,11 @@ class QuestionsRetrieveAPIView(generics.ListAPIView):
         queryset = self.get_queryset(request=request)
         instance = {'questions' : queryset}
         serializer = self.get_serializer(instance)
+        print("being called")
         return Response(serializer.data)
 
 class SubmitAnswersAPIView(APIView):
-    # dependencies (category, questions, number of questions)
+    # optimzie on taking input "category"
     # check for answers, update the avg score, update the score
 
     permission_classes = [permissions.IsAuthenticated]
@@ -135,7 +174,7 @@ class SubmitAnswersAPIView(APIView):
         # suggestion send the choices directly instead of sending them as (easy, mid, hard) and get the difficulty in the backend 
         data = request.data
         
-
+        user = request.user
         serializer = SubmitAnswersSerializer(data =data)
 
         if serializer.is_valid(raise_exception=True):
@@ -145,10 +184,9 @@ class SubmitAnswersAPIView(APIView):
         medium = validated_data['choices']['medium']
         hard = validated_data['choices']['hard']
 
-        profile = Profile.objects.get(name= request.user)
         category = self.get_category(easy, medium, hard)
         total_score = self.get_total_score(validated_data['count'])
-        score =0
+        score = 0
         try:
             
             for answer in easy:
@@ -171,12 +209,12 @@ class SubmitAnswersAPIView(APIView):
                 is_correct = selected_choice.is_correct
                 if is_correct:
                     score+=self.scoring['hard']
-
-            score_percentage = (score/total_score) *100
-            TestMarksLibrary.objects.create(profile = profile, score = score, category = category)
-            test_lib = TestScoresLibrary.objects.create(profile = profile, score = score_percentage, category = category )
+            score_percentage = (score/total_score) * 100
+            GroupTestScoresLibrary.objects.create(user = user, score = score, category = category)
+            test_lib = GroupTestScoresLibrary.objects.create(user = user, score = score_percentage, category = category )
+            
             if score_percentage > 40:
-                test_lib.update_average_score(profile= profile, category=category)
+                test_lib.update_average_score(user= user, category=category)
         except :
             return Response({'detail': 'Question or Choice does not exist'}, status=status.HTTP_404_NOT_FOUND)
         print(round(score_percentage, 2))

@@ -19,24 +19,24 @@ class GroupTestCategory(models.Model):
     def __str__(self):
         return self.name
 
-
 class GroupTest(models.Model):
     # add user to it    
+    # create check if the choices are more than four
     DIFFICULTY_CHOICES = [
         ('easy', 'Easy'),
         ('medium', 'Medium'),
         ('hard', 'Hard'),
     ]
     # change the blank field later
-    user = models.ForeignKey(User, on_delete=models.CASCADE, blank = True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     # difficulty = models.CharField(max_length=10,choices= DIFFICULTY_CHOICES)
     description = models.TextField()
     category = models.ForeignKey(GroupTestCategory, on_delete=models.CASCADE)
-    easy_test_file = models.FileField(upload_to='media/test_files/')
-    medium_test_file = models.FileField(upload_to='media/test_files/')
-    hard_test_file = models.FileField(upload_to='media/test_files/')
-    # password = models.CharField(max_length = 20, null = True, blank = True)
+    easy_test_file = models.FileField(upload_to='media/group_test_files/')
+    medium_test_file = models.FileField(upload_to='media/group_test_files/')
+    hard_test_file = models.FileField(upload_to='media/group_test_files/')
+    has_password = models.BooleanField(default = False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)   
 
@@ -75,6 +75,7 @@ class GroupTest(models.Model):
 
             if(difficulty == 'easy'):
                 question = EasyQuestion.objects.get_or_create(test=self, text=question_text)
+                # make questions such that there are no duplicates
                 choice_1 = ChoiceForEasyQ.objects.get_or_create(question=question[0], text=choice1, is_correct=correct_answer == 'A')
                 choice_2 = ChoiceForEasyQ.objects.get_or_create(question=question[0], text=choice2, is_correct=correct_answer == 'B')
                 choice_3 = ChoiceForEasyQ.objects.get_or_create(question=question[0], text=choice3, is_correct=correct_answer == 'C')
@@ -95,6 +96,9 @@ class GroupTest(models.Model):
                 choice_4 = ChoiceForHardQ.objects.get_or_create(question=question[0], text=choice4, is_correct=correct_answer == 'D')
 
 
+class TestPassword(models.Model):
+    test = models.OneToOneField(GroupTest, on_delete=models.CASCADE, related_name='password_info')
+    password = models.CharField(max_length=100)
 
 
 class EasyQuestion(models.Model):
@@ -169,10 +173,16 @@ class GroupTestCombinedCategory(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null = True)
     name = models.CharField(max_length= 20)
     associated_categories = models.ManyToManyField(GroupTestCategory)
+    has_password = models.BooleanField(default = False)
 
     def get_username(self):
         return  str(self.user.username)
 
     def __str__(self) -> str:
         return self.name
+    
+class GroupTestPassword(models.Model):
+    # stores password for the combined categorical tests
+    test = models.OneToOneField(GroupTestCombinedCategory, on_delete=models.CASCADE, related_name='password_info')
+    password = models.CharField(max_length=100)
     

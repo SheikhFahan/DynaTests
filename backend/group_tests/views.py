@@ -17,6 +17,10 @@ from user_profiles.models import Profile, AverageScore, TestMarksLibrary, TestSc
 from user_profiles.user_group_models import GroupTestAverageScore, GroupTestMarksLibrary, GroupTestScoresLibrary
 from tests.serializers import QuestionSerializer, SubmitAnswersSerializer
 
+class GroupTestCategoryListAPIView(generics.ListAPIView):
+    serializer_class = CategorySerializer
+    queryset = GroupTestCategory.objects.all()
+
 class GroupTestCreateAPIView(generics.CreateAPIView):
     serializer_class = GroupTestSerializer
     queryset = GroupTest.objects.all()

@@ -3,10 +3,13 @@ import { Chart as ChartJS, defaults } from "chart.js/auto";
 import { Bar, Doughnut, Line } from "react-chartjs-2";
 
 const GraphComp = ({ data }) => {
-    const dateLabels = data.map((entry) => new Date(entry.timestamp).toLocaleDateString());
+  const dateLabels = data.map((entry) =>
+    new Date(entry.timestamp).toLocaleDateString()
+  );
   const scores = data.map((entry) => entry.score);
+  const maxScore = Math.max(...scores);
 
-  // Set up chartData for the Line component
+
   const chartData = {
     labels: dateLabels,
     datasets: [

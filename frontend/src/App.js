@@ -14,6 +14,7 @@ import LoginPage from "./Pages/LoginPage";
 import CategoriesPage from "./Pages/CategoriesPage";
 import ProfileCard from "./Pages/ProfilePage";
 import CombinationQuestions from "./Components/CombinationQuestions";
+import GroupTestUplaod from "./Pages/GroupTestUpload";
 
 function App() {
   return (
@@ -29,6 +30,8 @@ function App() {
               <Route path="/test" element={<QuestionCard />} />
               <Route path="/profile" element={<ProfileCard/>} />
               <Route path='/dyn_test/:categoryId' element ={<QuestionCard />} />
+              <Route path='/create_group_test' element ={<GroupTestUplaod />} />
+              
               <Route path='/comb_dyn_test/:categoryId' element ={<CombinationQuestions />} />
 
             </Route>

@@ -45,7 +45,7 @@ const NavbarComp = () => {
 
 
             <NavDropdown title="Dropdown" id="basic-nav-dropdown">
-              <NavDropdown.Item to="" as={Link}>Action</NavDropdown.Item>
+              <NavDropdown.Item to="/create_group_test" as={Link}>upload group test</NavDropdown.Item>
               <NavDropdown.Item to="" as={Link}>
                 Another action
               </NavDropdown.Item>

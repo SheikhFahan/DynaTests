@@ -31,7 +31,7 @@ const CategoriesPage = () => {
 
   return (
     <>
-      <h3>Combination categories</h3>
+      <h3>Categories</h3>
       <div style={{ display: "flex", gap: "10px" }}>
         {categories.map((item) => (
           <button key={item.pk}>

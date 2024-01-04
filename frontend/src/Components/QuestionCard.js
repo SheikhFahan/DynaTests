@@ -54,8 +54,6 @@ const QuestionCard = () => {
           count_hard: response.data.hard_questions.length,
         });
         setLoading(false);
-        // console.log(JSON.stringify(questions))
-        // console.log("coming here ")
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -156,7 +154,7 @@ const QuestionCard = () => {
         }
       );
       setShowScore(response.data)
-      // console.log("Response", response.data);
+      console.log(response.data)
     } catch (error) {
       console.error("Error:", error);
     }
@@ -168,6 +166,7 @@ const QuestionCard = () => {
   if (error) {
     return <div>{error}</div>;
   }
+  console.log("this file is working")
   return (
     <div className="card-outer">
       {showScore ? (

@@ -32,23 +32,27 @@ class GroupTestCreateAPIView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         data = request.data
         category = data['category']
-        category_id = GroupTestCategory.objects.get(name = category).pk
+        try:
+            category_id = GroupTestCategory.objects.get(name=category).pk
+        except GroupTestCategory.DoesNotExist:
+            return Response({'error': 'Category not found'}, status=status.HTTP_400_BAD_REQUEST)
+
         data['category'] = category_id
-        print(data)
         serializer = GroupTestSerializer(data = data)
-        if not serializer.is_valid():
-            print(serializer.errors)
-        return super().create(request, *args, **kwargs)
 
-    def perform_create(self, serializer):
-        group_test_object = serializer.save(user=self.request.user)
+        if serializer.is_valid():
+            serializer.save(user = request.user)
+            group_test_object = serializer.save(user=self.request.user)
 
-        # Include the 'pk' of the created object in the response incase password in needed to be saved
-        response_data = {
-            'pk': group_test_object.pk,
-            'message': 'Test created successfully.',
-        }
-        return Response(response_data, status=status.HTTP_201_CREATED)
+            # Include the 'pk' of the created object in the response incase password in needed to be saved
+            response_data = {
+                'pk': group_test_object.pk,
+                'message': 'Test created successfully.',
+            }
+            
+            return Response(response_data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PasswordCreateAPIView(generics.CreateAPIView):

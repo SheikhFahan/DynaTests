@@ -2,6 +2,8 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView     
 from rest_framework import permissions
+from rest_framework.parsers import MultiPartParser, FormParser
+
 
 from .serializers import GroupTestSerializer, CategorySerializer, PasswordSerializer
 from .models import GroupTest
@@ -25,6 +27,18 @@ class GroupTestCreateAPIView(generics.CreateAPIView):
     serializer_class = GroupTestSerializer
     queryset = GroupTest.objects.all()
     permission_classes = [permissions.IsAuthenticated]
+    # parser_classes = (MultiPartParser, FormParser)
+    
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        category = data['category']
+        category_id = GroupTestCategory.objects.get(name = category).pk
+        data['category'] = category_id
+        print(data)
+        serializer = GroupTestSerializer(data = data)
+        if not serializer.is_valid():
+            print(serializer.errors)
+        return super().create(request, *args, **kwargs)
 
     def perform_create(self, serializer):
         group_test_object = serializer.save(user=self.request.user)

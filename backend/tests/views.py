@@ -171,6 +171,7 @@ class QuestionsRetrieveAPIView(generics.ListAPIView):
             'General' : 10,
             'Interview' : 10,
             'KCET' : 10,
+            'Placements' : 10,
         }
     weight_ranges = {
             (0, 50): {'easy': 6, 'medium': 3, 'hard': 1},
@@ -408,6 +409,7 @@ class SubmitAnswersAPIView(APIView):
                     score+=self.scoring['hard']
 
             score_percentage = (score/total_score) *100
+            print("The marks are :", score)
             TestMarksLibrary.objects.create(profile = profile, score = score, category = category)
             test_lib = TestScoresLibrary.objects.create(profile = profile, score = score_percentage, category = category )
             if score_percentage > 40:
@@ -416,5 +418,5 @@ class SubmitAnswersAPIView(APIView):
 
         except :
             return Response({'detail': 'Question or Choice does not exist'}, status=status.HTTP_404_NOT_FOUND)
-        print(round(score_percentage, 2))
+        print("the score is" ,round(score_percentage, 2))
         return Response(round(score_percentage, 2))

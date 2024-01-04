@@ -19,7 +19,11 @@ class Profile(models.Model):
         return 'learn to code first'
 
 class TestScoresLibrary(models.Model):
+    """
+    used to save score_percentage to generate the test accoring to the difficulty
+    """
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    # change score to score_percentage 
     score = models.IntegerField()
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now=True)
@@ -34,6 +38,9 @@ class TestScoresLibrary(models.Model):
     
     
 class AverageScore(models.Model):
+    """
+    dependent on TestScoresLibrary for objects
+    """
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     avg_score = models.IntegerField()
@@ -46,6 +53,9 @@ class AverageScore(models.Model):
         return f"{self.profile.name}, {self.category}, {self.avg_score}"
     
 class TestMarksLibrary(models.Model):
+    """
+    used to save marks to show show growth on the graph
+    """
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     score = models.IntegerField()
     category = models.ForeignKey(Category, on_delete=models.CASCADE)

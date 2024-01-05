@@ -16,8 +16,6 @@ class GroupTestSerializer(serializers.ModelSerializer):
             'medium_test_file',
             'hard_test_file',
             'has_password'
-            
-
         ]
 
         extra_kwargs = {

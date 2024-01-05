@@ -54,7 +54,7 @@ class AverageScore(models.Model):
     
 class TestMarksLibrary(models.Model):
     """
-    used to save marks to show show growth on the graph
+    used to save marks to show show growth on the 
     """
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     score = models.IntegerField()

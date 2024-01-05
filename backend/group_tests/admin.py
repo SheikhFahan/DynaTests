@@ -4,7 +4,8 @@ from django.contrib import admin
 from .models import (
     GroupTest, GroupTestCategory, EasyQuestion, 
     MediumQuestion, HardQuestion, ChoiceForEasyQ,
-    ChoiceForMediumQ, ChoiceForHardQ, GroupTestCombinedCategory
+    ChoiceForMediumQ, ChoiceForHardQ, GroupTestCombinedCategory,
+    TestPassword
 )
 
 admin.site.register(GroupTest)
@@ -16,3 +17,5 @@ admin.site.register(ChoiceForEasyQ)
 admin.site.register(ChoiceForMediumQ)
 admin.site.register(ChoiceForHardQ)
 admin.site.register(GroupTestCombinedCategory)
+admin.site.register(TestPassword)
+

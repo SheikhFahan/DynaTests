@@ -56,13 +56,14 @@ class GroupTestCreateAPIView(generics.CreateAPIView):
 
 
 class PasswordCreateAPIView(generics.CreateAPIView):
+    #  make sure that only the test owner can create or change passwords
     # saves the password for the tests which have is_password == True
     serializer_class = PasswordSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    
-    def perform_create(self, serializer):
-        # get this after the test object is created
-        test_id =  self.kwargs['test_id']
+
+
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        test_id  = data['test']
         
         try:
             test_object = GroupTest.objects.get(pk=test_id)
@@ -72,12 +73,17 @@ class PasswordCreateAPIView(generics.CreateAPIView):
         if TestPassword.objects.filter(test=test_object).exists():
             return Response({"error": "Password already exists for this test"}, status=status.HTTP_400_BAD_REQUEST)
         
-        data = self.request.data
-        hashed_password = make_password(data.get("password"))
-
-        serializer.save(test = test_object, password = hashed_password)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
+        hashed_password = make_password(data["password"])
+        print(test_id, hashed_password)
+        serializer = self.get_serializer(data = {'test' : test_object.pk, 'password' : hashed_password})
+        if serializer.is_valid():
+            serializer.save()
+            headers = self.get_success_headers(serializer.data)
+            return Response(status=status.HTTP_201_CREATED, headers=headers)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        
 class QuestionsRetrieveAPIView(generics.ListAPIView):
     """
     similar to QuestionsREtrieveAPIView in 'tests': reason for not importing that was the use of tables add making that 

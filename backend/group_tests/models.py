@@ -97,8 +97,14 @@ class GroupTest(models.Model):
 
 
 class TestPassword(models.Model):
+    """
+        saves passwords for the test for a group of people
+    """
     test = models.OneToOneField(GroupTest, on_delete=models.CASCADE, related_name='password_info')
     password = models.CharField(max_length=100)
+    
+    def __str__(self) -> str:
+        return f'{self.test.pk} test by {self.test.user}'
 
 
 class EasyQuestion(models.Model):
@@ -182,7 +188,7 @@ class GroupTestCombinedCategory(models.Model):
         return self.name
     
 class GroupTestPassword(models.Model):
-    # stores password for the combined categorical tests
+    # stores password for the combined categorical tests for a group of people
     test = models.OneToOneField(GroupTestCombinedCategory, on_delete=models.CASCADE, related_name='password_info')
     password = models.CharField(max_length=100)
     

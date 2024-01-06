@@ -8,15 +8,20 @@ from group_tests.models import GroupTestCategory
 
 
 class Profile(models.Model):
+    """
+    saves profile information about the user
+    """
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='auth_user')
     name = models.CharField(max_length= 100, null= True)
     email = models.EmailField(max_length= 30)
     phone = models.CharField(max_length=13, blank= False)
+    
 
     def __str__(self):
         if self.name :
             return self.name
         return 'learn to code first'
+
 
 class TestScoresLibrary(models.Model):
     """

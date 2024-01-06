@@ -11,6 +11,10 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 
 class GroupTestCategory(models.Model):
+    """
+    category created by the institution should be limited to the institution
+    """
+    user = models.ForeignKey(User, on_delete = models.CASCADE)
     name = models.CharField(max_length=15)
 
     class Meta:

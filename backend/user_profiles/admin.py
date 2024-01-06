@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from .models import Profile, TestScoresLibrary, AverageScore, TestMarksLibrary, CombinedTestScoresLibrary
-from .user_group_models import  GroupTestScoresLibrary, GroupTestAverageScore, GroupTestMarksLibrary, CombinedGroupTestScoresLibrary
+from .user_group_models import  GroupTestScoresLibrary, GroupTestAverageScore, GroupTestMarksLibrary, CombinedGroupTestScoresLibrary,  InstituteProfile
 
 
 admin.site.register(Profile)
@@ -13,3 +13,4 @@ admin.site.register(GroupTestScoresLibrary)
 admin.site.register(GroupTestAverageScore)
 admin.site.register(GroupTestMarksLibrary)
 admin.site.register(CombinedGroupTestScoresLibrary)
+admin.site.register(InstituteProfile)

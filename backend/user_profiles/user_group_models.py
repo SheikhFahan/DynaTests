@@ -5,6 +5,20 @@ from group_tests.models import GroupTestCategory, GroupTestCombinedCategory
 
 # change profile to user as the foreign key relation
 
+    
+class InstituteProfile(models.Model):
+    """
+    saves profile information for colleges
+    """
+    # try finding api for university and college names
+    user = models.ForeignKey(User, on_delete = models.CASCADE)
+    college_name = models.CharField(max_length= 100, null= True)
+    email = models.EmailField(max_length= 30)
+    phone = models.IntegerField()
+    university_name = models.CharField(max_length= 100, null= True)
+    address = models.CharField(max_length=255, blank=True, null=True)
+
+
 class GroupTestScoresLibrary(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     score = models.IntegerField()

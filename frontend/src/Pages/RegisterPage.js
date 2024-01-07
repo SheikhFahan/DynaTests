@@ -22,10 +22,10 @@ const RegisterPage = () => {
 
 
   let handleSubmit = async (e) => {
-    if (userData.password1 !== userData.password2) {
-      console.log(userData.password1, userData.password2)
-      return alert("passwords don't match");
-    }
+      if (userData.password1 !== userData.password2) {
+        console.log(userData.password1, userData.password2)
+        return alert("passwords don't match");
+      }
     const formData = new FormData();
     formData.append("email", userData.email);
     formData.append("password", userData.password1);

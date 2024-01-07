@@ -83,7 +83,7 @@ const GroupTestUplaod = () => {
     formDataToSend.append("has_password", formData.hasPassword);
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/group_tests/create_group_test",
+        "http://127.0.0.1:8000/api/group_tests/sub_group_test",
         formDataToSend,
         {
           headers: {

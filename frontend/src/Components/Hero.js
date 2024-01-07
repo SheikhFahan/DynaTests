@@ -25,7 +25,7 @@ const Hero = () => {
                     <div className="h-48 flex flex-wrap content-center">
                         <img
                             className="inline-block mt-8 md:mt-0 md:p-8 lg:p-0 w-full md:w-auto"
-                            src="https://user-images.githubusercontent.com/54521023/116969935-c13d5b00-acd4-11eb-82b1-5ad2ff10fb76.png"
+                            
                             alt="TechFest Image 1"
                         />
                     </div>
@@ -36,3 +36,4 @@ const Hero = () => {
 };
 
 export default Hero;
+

@@ -31,7 +31,6 @@ class UserCreateAPIView(generics.CreateAPIView):
 
 class InstituteUserCreateAPIView(generics.CreateAPIView):
     serializer_class = InstituteUserSerializer
-    queryset = InstituteProfile.objects.all()
 
 
     

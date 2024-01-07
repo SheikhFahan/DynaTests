@@ -183,8 +183,7 @@ class GroupTestCombinedCategory(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null = True)
     name = models.CharField(max_length= 20)
     associated_categories = models.ManyToManyField(GroupTestCategory)
-    has_password = models.BooleanField(default = False)
-
+    
     def get_username(self):
         return  str(self.user.username)
 

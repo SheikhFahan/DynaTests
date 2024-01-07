@@ -6,7 +6,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 
 
 from .serializers import GroupTestSerializer, CategorySerializer, PasswordSerializer
-from .models import GroupTest
+from .models import GroupTest, GroupTestCombinedCategory
 
 from .models import (
     GroupTestCategory, EasyQuestion, MediumQuestion, HardQuestion,
@@ -19,11 +19,25 @@ from user_profiles.models import Profile, AverageScore, TestMarksLibrary, TestSc
 from user_profiles.user_group_models import GroupTestAverageScore, GroupTestMarksLibrary, GroupTestScoresLibrary
 from tests.serializers import QuestionSerializer, SubmitAnswersSerializer
 
-class GroupTestCategoryListAPIView(generics.ListAPIView):
+class GroupTestCategoryListCreateAPIView(generics.ListCreateAPIView):
+    #in the list method allow add isOwner rights 
     serializer_class = CategorySerializer
     queryset = GroupTestCategory.objects.all()
 
-class GroupTestCreateAPIView(generics.CreateAPIView):
+    def perform_create(self, serializer):
+        serializer.save(user = self.request.serializer)
+        print(serializer.data)
+
+class GroupTestCombinedCategoryListCreateAPIView(generics.ListCreateAPIView):
+    #in the list method allow add isOwner rights 
+    serializer_class = CategorySerializer
+    queryset = GroupTestCombinedCategory.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save(user = self.request.serializer)
+        print(serializer.data)
+
+class GroupTestListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = GroupTestSerializer
     queryset = GroupTest.objects.all()
     permission_classes = [permissions.IsAuthenticated]

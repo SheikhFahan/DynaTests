@@ -29,6 +29,14 @@ class CategorySerializer(serializers.ModelSerializer):
             'name'
         ]
 
+
+class CombinedCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GroupTestCombinedCategory
+        fields = [
+            'name'
+        ]
+
 class PasswordSerializer(serializers.ModelSerializer):
     class Meta:
         model = TestPassword

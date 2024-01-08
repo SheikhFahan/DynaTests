@@ -52,7 +52,7 @@ const NavbarComp = () => {
             )}
 
             <NavDropdown title="Dropdown" id="basic-nav-dropdown">
-              <NavDropdown.Item to="/create_group_test" as={Link}>
+              <NavDropdown.Item to="/institution_dashboard/create_group_test/" as={Link}>
                 upload group test
               </NavDropdown.Item>
               {user && (

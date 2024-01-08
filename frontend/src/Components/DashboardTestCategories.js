@@ -9,30 +9,35 @@ import axios from "axios";
 import AuthContext from "../Context/AuthContext";
 
 import React, { useState, useEffect, useContext } from "react";
+import { isAccordionItemSelected } from "react-bootstrap/esm/AccordionContext";
 
-export const GroupTestSubTestComp = (props) => {
+export const DashboardTestCategories = (props) => {
   const mainUrl = "http://127.0.0.1:8000/api/group_tests/";
   const { compName, urlEnd } = props.data;
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState();
   const { AuthTokens } = useContext(AuthContext);
 
+  
   const getEndpoint = (name) => {
     switch (name) {
       case "Sub-Tests":
-        return "sub_group_test";
+        return "create_group_test/";
         break;
       case "Test Categories":
-        return "group_test_categories";
+        return "create_categories/";
         break;
       case "Test Combinations":
-        return "group_test_combined_categories";
+        return "create_combined_categories/";
         break;
 
       default:
         throw new Error(`Unexpected value for name: ${name}`);
     }
   };
+
+  const creationPage = getEndpoint(compName);
+
   useEffect(() => {
     axios
       .get(`${mainUrl}${urlEnd}`, {
@@ -51,11 +56,6 @@ export const GroupTestSubTestComp = (props) => {
       });
   }, []);
 
-  const handleCreate = async (e) => {
-    const endpoint = getEndpoint(compName)
-    console.log(endpoint)
-  };
-
   return (
     <Navbar className="bg-body-tertiary">
       <Container>
@@ -64,14 +64,14 @@ export const GroupTestSubTestComp = (props) => {
         <br />
 
         {data.map((item) => (
-          <Nav.Link to="/" as={Link} className="mx-3">
-            {item.title}
+          <Nav.Link to="/" as={Link} key ={item.pk} className="mx-3">
+            {item.title} {item.name}
           </Nav.Link>
         ))}
 
         <Navbar.Collapse className="justify-content-end">
-          <Navbar.Text>
-            <button onClick={handleCreate}> create new {compName}</button>
+          <Navbar.Text to={creationPage} as={Link}>
+            <button > create new {compName}</button>
           </Navbar.Text>
           <Navbar.Text>
             <button> create new test session</button>
@@ -82,4 +82,4 @@ export const GroupTestSubTestComp = (props) => {
   );
 };
 
-export default GroupTestSubTestComp;
+export default DashboardTestCategories;

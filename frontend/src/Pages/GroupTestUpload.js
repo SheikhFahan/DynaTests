@@ -8,7 +8,7 @@ import axios from "axios";
 
 import AuthContext from "../Context/AuthContext";
 
-const GroupTestUplaod = () => {
+const GroupTestUpload = () => {
   const [category, setCategory] = useState([]);
   const [formData, setFormData] = useState({
     title: "",
@@ -298,4 +298,4 @@ const GroupTestUplaod = () => {
     </>
   );
 };
-export default GroupTestUplaod;
+export default GroupTestUpload;

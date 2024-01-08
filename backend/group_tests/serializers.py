@@ -31,10 +31,12 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class CombinedCategorySerializer(serializers.ModelSerializer):
+    associated_categories  = CategorySerializer(many = True)
     class Meta:
         model = GroupTestCombinedCategory
         fields = [
-            'name'
+            'name',
+            'associated_categories',
         ]
 
 class PasswordSerializer(serializers.ModelSerializer):

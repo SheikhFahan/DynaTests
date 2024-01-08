@@ -5,7 +5,7 @@ from rest_framework import permissions
 from rest_framework.parsers import MultiPartParser, FormParser
 
 
-from .serializers import GroupTestSerializer, CategorySerializer, PasswordSerializer
+from .serializers import GroupTestSerializer, CategorySerializer, PasswordSerializer, CombinedCategorySerializer
 from .models import GroupTest, GroupTestCombinedCategory
 
 from .models import (
@@ -25,12 +25,12 @@ class GroupTestCategoryListCreateAPIView(generics.ListCreateAPIView):
     queryset = GroupTestCategory.objects.all()
 
     def perform_create(self, serializer):
-        serializer.save(user = self.request.serializer)
-        print(serializer.data)
+        serializer.save(user = self.request.user)
+        return Response({'message': f'{serializer.name} Object created successfully'}, status=status.HTTP_201_CREATED)
 
 class GroupTestCombinedCategoryListCreateAPIView(generics.ListCreateAPIView):
     #in the list method allow add isOwner rights 
-    serializer_class = CategorySerializer
+    serializer_class = CombinedCategorySerializer
     queryset = GroupTestCombinedCategory.objects.all()
 
     def perform_create(self, serializer):
